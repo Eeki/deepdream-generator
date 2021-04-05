@@ -1,0 +1,8 @@
+# path is the docker context
+images:
+  deepdream-image:
+    path: ./deepdream_generator_api/
+    file: ./functions/deepdream/Dockerfile
+  file-record-image:
+    path: ./deepdream_generator_api/
+    file: ./functions/file_records/Dockerfile

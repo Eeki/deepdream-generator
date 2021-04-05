@@ -1,0 +1,9 @@
+build
+node_modules
+.serverless
+env
+.pytest_cache
+__pycache__/
+*.py[cod]
+.python-version
+deepdream_generator_api/notebooks

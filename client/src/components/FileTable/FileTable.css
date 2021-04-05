@@ -1,0 +1,14 @@
+.FileTableRow:hover {
+        background-color: yellow;
+    }
+
+.FileTableCell {
+    /* Standard CSS ellipsis */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Beginning of string */
+    direction: rtl;
+    text-align: left;
+}

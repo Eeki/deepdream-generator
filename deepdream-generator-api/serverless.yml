@@ -1,0 +1,29 @@
+service: deepdream-generator-api
+
+frameworkVersion: "2"
+
+configValidationMode: error
+
+provider:
+  name: aws
+  region: eu-north-1
+  runtime: python3.8
+  stage: dev # TODO
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    minimumCompressionSize: 1024
+    shouldStartNameWithService: true
+  ecr: ${file(resources/images.yml)}
+
+package:
+  individually: true
+
+plugins:
+  - serverless-iam-roles-per-function
+
+resources:
+  - ${file(resources/api-gateway-errors.yml)}
+
+functions:
+  - ${file(deepdream_generator_api/functions/file_records/functions.yml)}
+  - ${file(deepdream_generator_api/functions/deepdream/functions.yml)}

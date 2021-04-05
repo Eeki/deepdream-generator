@@ -1,0 +1,6 @@
+python-lambda-local
+pytest
+boto3
+pytest-dotenv
+pynamodb
+tensorflow

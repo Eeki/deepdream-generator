@@ -1,0 +1,27 @@
+deepdream-image:
+  image:
+    name: deepdream-image
+    command:
+      - deepdream_generator_api/functions/deepdream/deepdream_image_transform.main
+    entryPoint:
+      - '/lambda-entrypoint.sh'
+  iamRoleStatementsName: deepdream-image-lambda-role
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/Files # TODO remove hard coded
+  environment: {
+    FILE_TABLE_NAME: Files # TODO remove hard coded
+  }
+  events:
+    - http:
+        path: deepdream-image-transform
+        method: post
+        cors: true
+        authorizer:
+          arn:
+            arn:aws:cognito-idp:eu-north-1:155802858460:userpool/eu-north-1_sIbi8xvI8 # TODO remove hard coded
