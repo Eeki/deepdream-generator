@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "title": "Create job post request",
+  "required": ["input_path"],
+  "properties": {
+    "file_path": {
+      "type": "string"
+    }
+  }
+}

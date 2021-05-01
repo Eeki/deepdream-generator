@@ -1,0 +1,60 @@
+job-create:
+  image:
+    name: job-image
+    command:
+      - deepdream_generator_api/functions/jobs/create.main
+    entryPoint:
+      - '/lambda-entrypoint.sh'
+  iamRoleStatementsName: job-create-lambda-role
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:PutItem
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/Jobs # TODO remove hard coded
+    - Effect: Allow
+      Action:
+        - sqs:GetQueueUrl
+        - sqs:SendMessage
+      Resource:
+        - arn:aws:sqs:${self:provider.region}:155802858460:job-queue # TODO remove hard coded
+  environment:
+    JOB_TABLE_NAME: Jobs # TODO remove hard coded
+    JOB_QUEUE_NAME: job-queue # TODO remove hard coded
+  events:
+    - http:
+        path: jobs
+        method: post
+        cors: true
+        authorizer:
+          arn: arn:aws:cognito-idp:eu-north-1:155802858460:userpool/eu-north-1_sIbi8xvI8 # TODO remove hard coded
+        request:
+          schemas:
+            application/json:
+              schema: ${file(deepdream_generator_api/functions/jobs/schemas/create-job.json)}
+
+job-list:
+  image:
+    name: job-image
+    command:
+      - deepdream_generator_api/functions/jobs/list.main
+    entryPoint:
+      - '/lambda-entrypoint.sh'
+  iamRoleStatementsName: job-list-lambda-role
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/Jobs # TODO remove hard coded
+  environment:
+    JOB_TABLE_NAME: Jobs # TODO remove hard coded
+  events:
+    - http:
+        path: jobs
+        method: get
+        cors: true
+        authorizer:
+          arn: arn:aws:cognito-idp:eu-north-1:155802858460:userpool/eu-north-1_sIbi8xvI8 # TODO remove hard coded

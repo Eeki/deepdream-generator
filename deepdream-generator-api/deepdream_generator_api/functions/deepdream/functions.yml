@@ -1,4 +1,5 @@
 deepdream-image:
+  reservedConcurrency: 100
   image:
     name: deepdream-image
     command:
@@ -15,13 +16,9 @@ deepdream-image:
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/Files # TODO remove hard coded
   environment: {
-    FILE_TABLE_NAME: Files # TODO remove hard coded
+    S3_FILE_BUCKET_ID: deepdream-generator-user-data # TODO remove hard coded
   }
   events:
-    - http:
-        path: deepdream-image-transform
-        method: post
-        cors: true
-        authorizer:
-          arn:
-            arn:aws:cognito-idp:eu-north-1:155802858460:userpool/eu-north-1_sIbi8xvI8 # TODO remove hard coded
+    - sqs:
+        arn: arn:aws:sqs:eu-north-1:155802858460:job-queue
+        batchSize: 1

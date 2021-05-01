@@ -1,0 +1,12 @@
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "user_id": $util.dynamodb.toDynamoDBJson($ctx.identity.username),
+    "file_path": $util.dynamodb.toDynamoDBJson($context.arguments.input.file_path)
+  },
+  "attributeValues": {
+    "file_name": $util.dynamodb.toDynamoDBJson($context.arguments.input.file_name),
+    "created_at": $util.dynamodb.toDynamoDBJson($util.time.nowEpochMilliSeconds())
+  }
+}

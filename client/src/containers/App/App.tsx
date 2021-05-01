@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Auth } from 'aws-amplify'
+import { Center, Spinner } from '@chakra-ui/react'
 import { AppContext } from '@libs/contextLib'
 import { onError } from '@libs/errorLib'
-import { Routes } from '../../Routes'
 import { Header } from '@components/Header'
+import { Routes } from '../../Routes'
 import './App.css'
 
 function App(): JSX.Element {
@@ -40,7 +41,19 @@ function App(): JSX.Element {
     <div className="App">
       <AppContext.Provider value={{ isAuthenticated, userHasAuthenticated }}>
         <Header isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
-        <Routes />
+        {isAuthenticating ? (
+          <Center h="100%" w="100%">
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="teal.500"
+              size="xl"
+            />
+          </Center>
+        ) : (
+          <Routes />
+        )}
       </AppContext.Provider>
     </div>
   )

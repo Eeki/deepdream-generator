@@ -20,7 +20,7 @@ export const FileUpload = ({
 }: FileUploadProps): JSX.Element => {
   const inputRef = useRef<HTMLInputElement>(null)
   return (
-    <FormControl isInvalid={Boolean(error)} isRequired>
+    <FormControl isInvalid={Boolean(error)} isRequired paddingTop="1rem">
       <InputGroup>
         <input
           type="file"

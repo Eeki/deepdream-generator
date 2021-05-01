@@ -1,21 +1,27 @@
 import json
 import time
+from deepdiff import DeepDiff
 from lambda_local.main import call
 from lambda_local.context import Context
 
 from deepdream_generator_api.functions.file_records import create
 from deepdream_generator_api.models.FileRecord import FileRecord
-from deepdream_generator_api.fixtures.file_record import file_record_table
+
+constant_time = time.time()
+
+
+def patch_time():
+    return constant_time
 
 
 class TestFileRecordCreat(object):
-    def test_create_success(self, file_record_table):
+    def test_create_success(self, monkeypatch, file_record_table):
         file_path = '1b74a419-b419-40a4-9fb5-dbf355db2b96-beach.jpg'
         file_name = 'beach.jpg'
         user_id = '123456'
         body = json.dumps({
-            'filePath': file_path,
-            'fileName': file_name
+            'file_path': file_path,
+            'file_name': file_name
         })
         event = {
             'requestContext': {
@@ -30,23 +36,31 @@ class TestFileRecordCreat(object):
         }
         context = Context(54000)
 
+        # Monkey patch time package so that function time.time() will return always the same time
+        monkeypatch.setattr(time, 'time', patch_time)
+
         # When calling create file record handler as authenticated user and with correct body
         response = call(create.main, event, context)
 
+        expected_file_record = {
+            'user_id': user_id,
+            'file_path': file_path,
+            'file_name': file_name,
+            'created_at': constant_time
+        }
+
         # Response has status code of 200 and a serialized FileRecord
         assert response[0]['statusCode'] == 200
-        response_body = json.loads(response[0]['body'])
-        assert response_body['userId'] == user_id
-        assert response_body['filePath'] == file_path
-        assert response_body['fileName'] == file_name
-        assert response_body['createdAt'] < time.time()
+        file_record = json.loads(response[0]['body'])
+
+        # Serialized FileRecord is as expected
+        assert not DeepDiff(expected_file_record, file_record, ignore_order=True)
 
         # Only one FileRecord is created
         assert FileRecord.count() == 1
 
-        # Created FileRecord is also in the db
+        # Created FileRecord can be found in the db
         file_record = FileRecord.get(hash_key=user_id, range_key=file_path)
-        assert file_record.userId == user_id
-        assert file_record.filePath == file_path
-        assert file_record.fileName == file_name
-        assert file_record.createdAt < time.time()
+
+        # FileRecord from db is as expected
+        assert not DeepDiff(expected_file_record, file_record.to_dict(), ignore_order=True)

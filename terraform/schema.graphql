@@ -1,0 +1,58 @@
+# TODO: Rename File to FileRecord
+# See example for Inputs from amplify-photo-sharing-workshop/postagram/amplify/#current-cloud-backend/api/Postagram/build/schema.graphql
+
+type File @aws_cognito_user_pools {
+    # Key attributes
+    file_path: String!
+    user_id: String!
+
+    # Other attributes
+    file_name: String
+    created_at: Float
+}
+
+type Job @aws_cognito_user_pools {
+    # Key attributes
+    user_id: String!
+    id: String!
+
+    # Index attributes
+    input_path: String
+
+    # Other attributes
+    input_name: String
+    result_path: String
+    progress: Float
+    started_at: Float
+}
+
+
+type PaginatedFiles {
+    items: [File]
+    nextToken: String
+}
+
+type PaginatedJobs {
+    items: [Job]
+    nextToken: String
+}
+
+input CreateFileInput {
+    file_path: String!
+    file_name: String!
+}
+
+type Query {
+    listUserFiles(count: Int, nextToken: String): PaginatedFiles! @aws_cognito_user_pools
+    listUserJobs(count: Int, nextToken: String): PaginatedJobs! @aws_cognito_user_pools
+}
+
+type Mutation {
+    createFile(input: CreateFileInput!): File @aws_cognito_user_pools
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+

@@ -49,6 +49,7 @@ https://reflectoring.io/aws-localstack/
 https://github.com/thombergs/code-examples/tree/master/aws/localstack
 https://spin.atomicobject.com/2020/02/03/localstack-terraform-circleci/
 https://betterprogramming.pub/dont-be-intimidated-learn-how-to-run-aws-on-your-local-machine-with-localstack-2f3448462254
+https://dev.to/goodidea/how-to-fake-aws-locally-with-localstack-27me
 
 ## For typescript see these
 - https://github.com/typescript-cheatsheets/react
@@ -61,3 +62,35 @@ https://betterprogramming.pub/dont-be-intimidated-learn-how-to-run-aws-on-your-l
 
 ## How to package python files as modules
 - https://medium.com/@nate_mitchell/serverless-packaging-user-defined-python-modules-41808776eae0
+
+
+# TODO
+- Change terraform state to global state
+- Change the name of the  project to Deepdreams
+- (maybe) combine POST, GET, etc for one API route (e.g files/) to one lambda
+
+
+# Not be done using batch because start up can be too slow
+
+# Could make sense to change the image processing service to run in aws ecs fargate.
+- Then the rest of the lambdas could use python runtime without containers  
+
+# How to do a s3 image gallery 
+- https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/s3-example-photos-view.html
+
+# MUST DO workshops
+- https://github.com/dabit3/amplify-photo-sharing-workshop
+- https://step-functions-workshop.go-aws.com/
+
+# Generally the workshops are great:
+- https://workshops.aws/
+
+# Graphql api authorization:
+https://docs.amazonaws.cn/en_us/appsync/latest/devguide/tutorial-dynamodb-resolvers.htm
+https://docs.aws.amazon.com/appsync/latest/devguide/resolver-mapping-template-reference-dynamodb.html#aws-appsync-resolver-mapping-template-reference-dynamodb-query
+
+
+## LONG TERM TODO: Add different video / image editing algorithms and rename the project for video-cloud or something 
+
+# TODO STYLING:
+- When page works technically read through the refactroing-ui book and do style refactor to the app

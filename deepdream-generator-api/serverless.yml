@@ -27,3 +27,4 @@ resources:
 functions:
   - ${file(deepdream_generator_api/functions/file_records/functions.yml)}
   - ${file(deepdream_generator_api/functions/deepdream/functions.yml)}
+  - ${file(deepdream_generator_api/functions/jobs/functions.yml)}

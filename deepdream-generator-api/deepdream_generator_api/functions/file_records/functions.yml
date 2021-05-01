@@ -22,6 +22,10 @@ file-record-create:
         cors: true
         authorizer:
           arn: arn:aws:cognito-idp:eu-north-1:155802858460:userpool/eu-north-1_sIbi8xvI8 # TODO remove hard coded
+        request:
+          schemas:
+            application/json:
+              schema: ${file(deepdream_generator_api/functions/file_records/schemas/create-file.json)}
 
 file-record-list:
   image:

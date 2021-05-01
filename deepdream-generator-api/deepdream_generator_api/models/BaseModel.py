@@ -6,6 +6,7 @@ from pynamodb.attributes import MapAttribute
 
 
 class BaseModel(Model):
+    """Allows to serialize the Model to dict or json """
     def to_json(self, indent=2):
         return json.dumps(self.to_dict(), indent=indent)
 

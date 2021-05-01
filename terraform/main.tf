@@ -1,3 +1,5 @@
+# TODO standardize naming (_ vs -)
+
 terraform {
   required_providers {
     aws = {
@@ -8,7 +10,12 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-north-1" # TODO hard coded
+}
+
+locals {
+  module_path        = abspath(path.module)
+  codebase_root_path = abspath("${path.module}/..")
 }
 
 # S3
@@ -205,16 +212,16 @@ resource "aws_cognito_identity_pool_roles_attachment" "main" {
 resource "aws_dynamodb_table" "file-table" {
   name         = "Files"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "userId"
-  range_key    = "filePath"
+  hash_key     = "user_id"
+  range_key    = "file_path"
 
   attribute {
-    name = "userId"
+    name = "user_id"
     type = "S"
   }
 
   attribute {
-    name = "filePath"
+    name = "file_path"
     type = "S"
   }
 
@@ -222,13 +229,187 @@ resource "aws_dynamodb_table" "file-table" {
     enabled = true
   }
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   tags = {
     Name        = "dynamodb-table-file-table"
     Environment = "dev"
     Terraform   = true
   }
+}
+
+resource "aws_dynamodb_table" "job-table" {
+  name         = "Jobs"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "user_id"
+  range_key    = "id"
+
+  attribute {
+    name = "user_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "input_path"
+    type = "S"
+  }
+
+  local_secondary_index {
+    name = "input_path_index"
+    projection_type = "ALL"
+    range_key = "input_path"
+  }
+
+  server_side_encryption {
+    enabled = true
+  }
 
   lifecycle {
     prevent_destroy = true
   }
+
+  tags = {
+    Name        = "dynamodb-table-job-table"
+    Environment = "dev"
+    Terraform   = true
+  }
+}
+
+resource "aws_sqs_queue" "job_queue_deadletter" {
+  name                      = "job-queue-deadletter"
+  delay_seconds             = 30
+  receive_wait_time_seconds = 10
+
+  tags = {
+    Name        = "sqs-job-queue-deadletter"
+    Environment = "dev"
+    Terraform   = true
+  }
+}
+
+resource "aws_sqs_queue" "job_queue" {
+  name                      = "job-queue"
+  message_retention_seconds = 86400
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.job_queue_deadletter.arn
+    maxReceiveCount     = 3
+  })
+
+  tags = {
+    Name        = "sqs-job-queue"
+    Environment = "dev"
+    Terraform   = true
+  }
+}
+
+
+# App sync
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_appsync_graphql_api" "deepdreams" {
+  authentication_type = "AMAZON_COGNITO_USER_POOLS"
+  name                = "deepdream_graphql_api"
+  schema              = file("schema.graphql")
+
+  user_pool_config {
+    aws_region     = "eu-north-1" # TODO hard coded
+    default_action = "ALLOW"
+    user_pool_id   = aws_cognito_user_pool.user_pool.id
+  }
+}
+
+resource "aws_iam_role" "deepdreams_appsync_datasource_role" {
+  name = "deepdreams_appsync_datasource_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "appsync.amazonaws.com"
+      },
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "deepdreams_appsync_datasource_policy" {
+  name   = "deepdreams_appsync_datasource_policy"
+  role   = aws_iam_role.deepdreams_appsync_datasource_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "dynamodb:*"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "${aws_dynamodb_table.file-table.arn}",
+        "${aws_dynamodb_table.job-table.arn}"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_appsync_datasource" "deepdreams_file_records" {
+  api_id           = aws_appsync_graphql_api.deepdreams.id
+  name             = "appsync_datasource_deepdreams_file_records"
+  service_role_arn = aws_iam_role.deepdreams_appsync_datasource_role.arn
+  type             = "AMAZON_DYNAMODB"
+
+  dynamodb_config {
+    table_name = aws_dynamodb_table.file-table.name
+  }
+}
+
+resource "aws_appsync_resolver" "deepdreams_file_create" {
+  api_id            = aws_appsync_graphql_api.deepdreams.id
+  data_source       = aws_appsync_datasource.deepdreams_file_records.name
+  type              = "Mutation"
+  field             = "createFile"
+  request_template  = file("appsync-mapping-templates/file-record-create-request.vm")
+  response_template = file("appsync-mapping-templates/basic-response.vm")
+}
+
+resource "aws_appsync_resolver" "deepdream_file_list" {
+  api_id            = aws_appsync_graphql_api.deepdreams.id
+  data_source       = aws_appsync_datasource.deepdreams_file_records.name
+  type              = "Query"
+  field             = "listUserFiles"
+  request_template  = file("appsync-mapping-templates/file-record-list-request.vm")
+  response_template = file("appsync-mapping-templates/paginated-response.vm")
+}
+
+resource "aws_appsync_datasource" "deepdreams_job" {
+  api_id = aws_appsync_graphql_api.deepdreams.id
+  name = "appsync_datasource_deepdreams_jobs"
+  service_role_arn = aws_iam_role.deepdreams_appsync_datasource_role.arn
+  type = "AMAZON_DYNAMODB"
+
+  dynamodb_config {
+    table_name = aws_dynamodb_table.job-table.name
+  }
+}
+
+resource "aws_appsync_resolver" "deepdream_job_list" {
+  api_id            = aws_appsync_graphql_api.deepdreams.id
+  data_source       = aws_appsync_datasource.deepdreams_job.name
+  type              = "Query"
+  field             = "listUserJobs"
+  request_template  = file("appsync-mapping-templates/file-record-list-request.vm")
+  response_template = file("appsync-mapping-templates/paginated-response.vm")
 }

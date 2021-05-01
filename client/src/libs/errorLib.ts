@@ -1,4 +1,7 @@
+// TODO don't work with graphql
+
 export function onError(error: Error | Record<string, string>) {
+  console.log('error', error)
   let message = error.toString()
 
   // Auth errors

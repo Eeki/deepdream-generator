@@ -1,43 +1,44 @@
 import React, { useRef, useState, useEffect, ChangeEvent } from 'react'
+import get from 'lodash/get'
 import { Box, Center } from '@chakra-ui/react'
-import { API } from 'aws-amplify'
-import { onError } from '@libs/errorLib'
-import { s3Upload, UploadResult } from '@libs/awsS3Lib'
+import { API, graphqlOperation } from 'aws-amplify'
 import { FileUpload } from '@components/FileUpload'
-import { FileTable } from '@components/FileTable'
-
-type RecordType = 'input' | 'intermediate' | 'result'
-
-interface FileRecord {
-  filePath: string
-  fileName: string
-  createdAt?: number
-  mimeType?: string
-  recordType?: RecordType
-}
+import { FileList } from '@components/FileList'
+import { onError } from '@libs/errorLib'
+import { s3VaultUpload, UploadResult } from '@libs/awsS3Lib'
+import { ListUserFileRecords } from '@libs/graphql/queries'
+import { CreateFileFileRecord } from '@libs/graphql/mutations'
+import type { FileRecord } from '@libs/types'
 
 // TODO Should this be in .env
 const MAX_ATTACHMENT_SIZE = 50000000
+
+interface FileBrowserProps {
+  onSelectedFileRecordChange: (fileRecord: FileRecord) => void
+  selectedFileRecord?: FileRecord
+}
 
 // TODO do the empty list case: (add min height and some message e.g "no uploaded files")
 // TODO remove file case
 
 // TODO make the upload like it is here https://codesandbox.io/s/4tv8g
-export function FileBrowser(): JSX.Element {
+export function FileBrowser({
+  onSelectedFileRecordChange,
+  selectedFileRecord,
+}: FileBrowserProps): JSX.Element {
   const file = useRef<File>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [fileRecords, setFileRecords] = useState<FileRecord[]>([])
-  const [selectedFileRecordIndex, setSelectedFileRecordIndex] = useState<
-    number | undefined
-  >(undefined)
 
   useEffect(() => {
-    async function _listFileRecords() {
-      const files = await listFileRecords()
-      setFileRecords(files)
-    }
-    _listFileRecords()
+    fetchFileRecords()
   }, [])
+
+  async function fetchFileRecords(): Promise<void> {
+    const response = await API.graphql(graphqlOperation(ListUserFileRecords))
+    const fileRecords = get(response, 'data.listUserFiles.items', [])
+    setFileRecords(fileRecords)
+  }
 
   async function handleFileUpload(
     event: ChangeEvent<HTMLInputElement>
@@ -59,7 +60,7 @@ export function FileBrowser(): JSX.Element {
     setIsLoading(true)
 
     try {
-      const uploadResult = await s3Upload(event.target.files[0])
+      const uploadResult = await s3VaultUpload(event.target.files[0])
       const fileRecord = await createFileRecord(uploadResult)
       setFileRecords([...fileRecords, fileRecord])
       // TODO add down load indicator to the file list like it is here https://codesandbox.io/s/4tv8g
@@ -71,22 +72,13 @@ export function FileBrowser(): JSX.Element {
     }
   }
 
-  // TODO move these functions to api dir/file
-  async function listFileRecords() {
-    return await API.get('files', '/files', undefined)
-  }
-
-  function createFileRecord(uploadResult: UploadResult) {
-    return API.post('files', '/files', {
-      body: uploadResult,
-    })
-  }
-
-  function selectFileRecord(index: number) {
-    console.log('index', index)
-    setSelectedFileRecordIndex(
-      index === selectedFileRecordIndex ? undefined : index
+  async function createFileRecord(
+    uploadResult: UploadResult
+  ): Promise<FileRecord> {
+    const response = await API.graphql(
+      graphqlOperation(CreateFileFileRecord, { input: uploadResult })
     )
+    return get(response, 'data.createFile', null)
   }
 
   return (
@@ -98,12 +90,13 @@ export function FileBrowser(): JSX.Element {
         borderWidth="1.1px"
         borderRadius="lg"
         overflow="hidden"
+        padding="1rem"
       >
         {/* TODO add loading spinner when loading initial fileRecords */}
-        <FileTable
+        <FileList
           fileRecords={fileRecords}
-          onClick={selectFileRecord}
-          selectedFileRecordIndex={selectedFileRecordIndex}
+          onSelectedFileRecordChange={onSelectedFileRecordChange}
+          selectedFileRecord={selectedFileRecord}
         />
         <FileUpload isLoading={isLoading} handleFileChange={handleFileUpload}>
           Click to Upload

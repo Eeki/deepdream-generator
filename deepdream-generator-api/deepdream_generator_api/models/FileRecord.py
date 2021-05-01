@@ -10,7 +10,7 @@ class FileRecord(BaseModel):
         region = os.environ.get('AWS_REGION')  # TODO is the region necessary here
         if os.environ.get('DYNAMODB_ENDPOINT_URL'):
             host = os.environ.get('DYNAMODB_ENDPOINT_URL')
-    userId = UnicodeAttribute(hash_key=True)
-    filePath = UnicodeAttribute(range_key=True)
-    fileName = UnicodeAttribute()
-    createdAt = NumberAttribute()
+    user_id = UnicodeAttribute(hash_key=True)
+    file_path = UnicodeAttribute(range_key=True)
+    file_name = UnicodeAttribute()
+    created_at = NumberAttribute()
