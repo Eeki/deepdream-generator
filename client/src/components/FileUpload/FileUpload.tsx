@@ -32,7 +32,10 @@ export const FileUpload = ({
         <LoaderButton
           isLoading={isLoading}
           variant="outline"
-          onClick={() => inputRef?.current?.click()}
+          onClick={() => {
+            console.log('click')
+            inputRef?.current?.click()
+          }}
           leftIcon={<DownloadIcon />}
           width="100%"
         >

@@ -1,9 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { Storage } from 'aws-amplify'
-
-interface StoredS3Object {
-  key: string
-}
+import type { UserInfo } from '@libs/types'
 
 export interface UploadResult {
   file_path: string
@@ -15,28 +12,53 @@ interface s3VaultCacheItem {
   url: string
 }
 
-const s3VaultCache: Record<string, s3VaultCacheItem> = {}
+const s3Cache: Record<string, s3VaultCacheItem> = {}
 
 // TODO get and return the mime type of the file. It will be saved to db
-export async function s3VaultUpload(file: File): Promise<UploadResult> {
-  const s3filepath = `${uuidv4()}-${file.name}`.replace(/\s+/g, '')
-  const { key } = (await Storage.vault.put(s3filepath, file, {
+export async function s3PrivateUpload(
+  file: File,
+  user?: UserInfo,
+  bucketName?: string
+): Promise<UploadResult> {
+  if (!bucketName) {
+    throw new Error('S3 bucket is not configured.')
+  }
+  console.log('user', user)
+  if (!user?.username) {
+    throw new Error('Cannot get current user. Please log out and try again.')
+  }
+
+  const s3FilePath = `private/${user.username}/${uuidv4()}-${
+    file.name
+  }`.replace(/\s+/g, '')
+  console.log('s3FilePath', s3FilePath)
+  await Storage.put(s3FilePath, file, {
     contentType: file.type,
-  })) as StoredS3Object
-  return { file_path: key, file_name: file.name }
+    customPrefix: {
+      public: '',
+    },
+  })
+  return { file_path: s3FilePath, file_name: file.name } // TODO add file_key
 }
 
-export async function s3VaultGet(filePath: string): Promise<string> {
-  const cachedItem = s3VaultCache[filePath]
+// TODO for some reason the resources behind pre-signed urls are not cached to Browser cache.
+export async function s3PrivateGet(filePath: string): Promise<string> {
+  const cachedItem = s3Cache[filePath]
+
   if (cachedItem) {
     const now = new Date()
-    const difference = now.valueOf() - cachedItem.timeStamp.valueOf() / 1000
+    const difference = (now.valueOf() - cachedItem.timeStamp.valueOf()) / 1000
     if (difference < 290) {
       return cachedItem.url
     }
   }
 
-  const url = (await Storage.vault.get(filePath, { expires: 300 })) as string
-  s3VaultCache[filePath] = { timeStamp: new Date(), url }
+  const url = (await Storage.get(filePath, {
+    expires: 300,
+    customPrefix: {
+      public: '',
+    },
+  })) as string
+  s3Cache[filePath] = { timeStamp: new Date(), url }
   return url
 }

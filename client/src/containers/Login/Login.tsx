@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Auth } from 'aws-amplify'
+import { Auth, JS } from 'aws-amplify'
 import {
   FormControl,
   FormLabel,
@@ -16,7 +16,7 @@ import { onError } from '@libs/errorLib'
 import { useFormFields } from '@libs/formHooksLib'
 import './Login.css'
 
-export default function Login() {
+export default function Login(): JSX.Element {
   const history = useHistory()
   const { userHasAuthenticated } = useAppContext()
   const [isLoading, setIsLoading] = useState(false)

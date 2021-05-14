@@ -1,0 +1,27 @@
+#set( $isUserAuthorized = false )
+#set( $allowedUser = $util.defaultIfNull($ctx.args.input.user_id, null) )
+#set( $identityValue = $util.defaultIfNull($ctx.identity.username,
+    $util.defaultIfNull($ctx.identity.claims.get("cognito:username"), "___xamznone____")) )
+
+#if( $util.isString($allowedUser) )
+    #if( $allowedUser == $identityValue )
+        #set( $isUserAuthorized = true )
+    #end
+#end
+
+#if($isUserAuthorized == true)
+{
+    "version": "2017-02-28",
+    "operation": "PutItem",
+    "key": {
+        "user_id": $util.dynamodb.toDynamoDBJson($ctx.args.input.user_id),
+        "file_path": $util.dynamodb.toDynamoDBJson($ctx.args.input.file_path)
+    },
+    "attributeValues": {
+        "file_name": $util.dynamodb.toDynamoDBJson($ctx.args.input.file_name),
+        "created_at": $util.dynamodb.toDynamoDBJson($util.time.nowEpochMilliSeconds())
+    },
+}
+#else
+    $util.unauthorized()
+#end

@@ -20,11 +20,15 @@ package:
 
 plugins:
   - serverless-iam-roles-per-function
+  - serverless-stack-output
 
 resources:
   - ${file(resources/api-gateway-errors.yml)}
 
 functions:
-  - ${file(deepdream_generator_api/functions/file_records/functions.yml)}
   - ${file(deepdream_generator_api/functions/deepdream/functions.yml)}
   - ${file(deepdream_generator_api/functions/jobs/functions.yml)}
+
+custom:
+  output:
+    handler: scripts/output.handler

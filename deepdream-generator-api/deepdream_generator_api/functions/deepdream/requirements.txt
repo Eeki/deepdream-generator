@@ -1,2 +1,5 @@
+pynamodb
 tensorflow
 Pillow
+requests_aws4auth
+gql

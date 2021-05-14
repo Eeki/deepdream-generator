@@ -1,58 +1,171 @@
-# TODO: Rename File to FileRecord
-# See example for Inputs from amplify-photo-sharing-workshop/postagram/amplify/#current-cloud-backend/api/Postagram/build/schema.graphql
-
-type File @aws_cognito_user_pools {
-    # Key attributes
-    file_path: String!
+input CreateFileInput {
     user_id: String!
-
-    # Other attributes
-    file_name: String
-    created_at: Float
+    file_path: String!
+    file_name: String!
 }
 
-type Job @aws_cognito_user_pools {
-    # Key attributes
+input CreateJobInput {
     user_id: String!
-    id: String!
-
-    # Index attributes
     input_path: String
-
-    # Other attributes
     input_name: String
     result_path: String
     progress: Float
     started_at: Float
 }
 
-
-type PaginatedFiles {
-    items: [File]
-    nextToken: String
+type File @aws_cognito_user_pools @aws_iam {
+    file_path: String!
+    user_id: String!
+    file_name: String
+    created_at: Float
 }
 
-type PaginatedJobs {
+type Job @aws_cognito_user_pools @aws_iam {
+    user_id: String!
+    id: String!
+    input_path: String
+    input_name: String
+    result_path: String
+    progress: Float
+    started_at: Float
+}
+
+type JobConnection {
     items: [Job]
     nextToken: String
 }
 
-input CreateFileInput {
-    file_path: String!
-    file_name: String!
-}
-
-type Query {
-    listUserFiles(count: Int, nextToken: String): PaginatedFiles! @aws_cognito_user_pools
-    listUserJobs(count: Int, nextToken: String): PaginatedJobs! @aws_cognito_user_pools
+type FileConnection {
+    items: [File]
+    nextToken: String
 }
 
 type Mutation {
-    createFile(input: CreateFileInput!): File @aws_cognito_user_pools
+    createOwnFile(input: CreateFileInput!): File
+    @aws_cognito_user_pools
+    createFile(input: CreateFileInput!): File
+    @aws_iam
+
+    # TODO separate lambda createFile Mutation with @aws_iam access
+
+    createJob(input: CreateJobInput!): Job
+    @aws_iam
+    updateJob(input: UpdateJobInput!): Job
+    @aws_iam
+}
+
+type Query {
+    listUserFiles(filter: FileFilterInput, limit: Int, nextToken: String): FileConnection
+    @aws_cognito_user_pools
+    listUserJobs(filter: JobFilterInput, limit: Int, nextToken: String): JobConnection
+    @aws_cognito_user_pools
+    getJob(user_id: String!, id: String!): Job
+    @aws_iam
+    # TODO add queryJobsByInputPathIndex if needed
+    # queryJobsByInputPathIndex(user_id: String!, first: Int, after: String): JobConnection @aws_cognito_user_pools
+}
+
+type Subscription {
+    onCreateJob(
+        user_id: String!
+    ): Job
+    @aws_subscribe(mutations: ["createJob"])
+    @aws_cognito_user_pools
+    onUpdateJob(
+        user_id: String!
+    ): Job
+    @aws_subscribe(mutations: ["updateJob"])
+    @aws_cognito_user_pools
+    onCreateFile(
+        user_id: String!
+    ): File
+    @aws_subscribe(mutations: ["createFile", "createOwnFile"])
+    @aws_cognito_user_pools
+}
+
+input BooleanFilterInput {
+    ne: Boolean
+    eq: Boolean
+}
+
+input FloatFilterInput {
+    ne: Float
+    eq: Float
+    le: Float
+    lt: Float
+    ge: Float
+    gt: Float
+    contains: Float
+    notContains: Float
+    between: [Float]
+}
+
+input IDFilterInput {
+    ne: ID
+    eq: ID
+    le: ID
+    lt: ID
+    ge: ID
+    gt: ID
+    contains: ID
+    notContains: ID
+    between: [ID]
+    beginsWith: ID
+}
+
+input IntFilterInput {
+    ne: Int
+    eq: Int
+    le: Int
+    lt: Int
+    ge: Int
+    gt: Int
+    contains: Int
+    notContains: Int
+    between: [Int]
+}
+
+input JobFilterInput {
+    id: StringFilterInput
+    input_path: StringFilterInput
+    input_name: StringFilterInput
+    result_path: StringFilterInput
+    progress: FloatFilterInput
+    started_at: FloatFilterInput
+}
+
+input FileFilterInput {
+    file_path: StringFilterInput
+    user_id: StringFilterInput
+    file_name: StringFilterInput
+    created_at: FloatFilterInput
+}
+
+input StringFilterInput {
+    ne: String
+    eq: String
+    le: String
+    lt: String
+    ge: String
+    gt: String
+    contains: String
+    notContains: String
+    between: [String]
+    beginsWith: String
+}
+
+input UpdateJobInput {
+    user_id: String!
+    id: String!
+    input_path: String
+    input_name: String
+    result_path: String
+    progress: Float
+    started_at: Float
 }
 
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }
-

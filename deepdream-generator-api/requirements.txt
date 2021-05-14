@@ -6,3 +6,5 @@ pynamodb
 tensorflow
 Pillow
 deepdiff
+requests_aws4auth
+gql

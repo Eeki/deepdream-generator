@@ -1,0 +1,16 @@
+#set( $isUserAuthorized = false )
+#set( $allowedUser = $util.defaultIfNull($ctx.args.user_id, null) )
+#set( $identityValue = $util.defaultIfNull($ctx.identity.username,
+    $util.defaultIfNull($ctx.identity.claims.get("cognito:username"), "___xamznone____")) )
+
+#if( $util.isString($allowedUser) )
+    #if( $allowedUser == $identityValue )
+        #set( $isUserAuthorized = true )
+    #end
+#end
+
+#if(!$isUserAuthorized == true)
+    $util.unauthorized()
+#end
+
+$util.toJson(null)

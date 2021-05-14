@@ -1,19 +1,16 @@
 import { Amplify, Auth } from 'aws-amplify'
+import axios from 'axios'
+import type { ApiEndpoint, AmplifyConfigs } from './types'
 
-import {
-  SNOWPACK_PUBLIC_AWS_REGION,
-  SNOWPACK_PUBLIC_CLIENT_DATA_BUCKET,
-  SNOWPACK_PUBLIC_USER_POOL_ID,
-  SNOWPACK_PUBLIC_APP_CLIENT_ID,
-  SNOWPACK_PUBLIC_IDENTITY_POOL_ID,
-  SNOWPACK_PUBLIC_API_ENDPOINT,
-} from '@libs/configsLib'
-
-const getEndpoints = (endpoints: string[]): Record<string, any> =>
-  endpoints.map(endpoint => ({
-    name: endpoint,
-    endpoint: SNOWPACK_PUBLIC_API_ENDPOINT,
-    region: SNOWPACK_PUBLIC_AWS_REGION,
+const getEndpoints = (
+  endpointNames: string[],
+  region: string,
+  apiEndpointUrl: string
+): ApiEndpoint[] =>
+  endpointNames.map(endpointName => ({
+    name: endpointName,
+    endpoint: apiEndpointUrl,
+    region: region,
     custom_header: async () => ({
       Authorization: `Bearer ${(await Auth.currentSession())
         .getIdToken()
@@ -21,30 +18,52 @@ const getEndpoints = (endpoints: string[]): Record<string, any> =>
     }),
   }))
 
-const appSyncConfigs = {
-  aws_appsync_graphqlEndpoint:
-    'https://dzc2p63gfbfzvivgqdpgzzq7pm.appsync-api.eu-north-1.amazonaws.com/graphql',
-  aws_appsync_region: SNOWPACK_PUBLIC_AWS_REGION,
-  aws_appsync_authenticationType: 'AMAZON_COGNITO_USER_POOLS',
-}
+// TODO type better
+export const amplifyConfigure = async (): Promise<
+  AmplifyConfigs | undefined
+> => {
+  try {
+    const {
+      data: {
+        region,
+        userDataBucket,
+        userPoolId,
+        userPoolWebClientId,
+        identityPoolId,
+        graphqlEndpoints,
+      },
+    } = await axios.get(`${window.location.origin}/config.json`)
 
-export const setupAmplify = (): void => {
-  Amplify.configure({
-    Auth: {
-      mandatorySignIn: true,
-      region: SNOWPACK_PUBLIC_AWS_REGION,
-      userPoolId: SNOWPACK_PUBLIC_USER_POOL_ID,
-      identityPoolId: SNOWPACK_PUBLIC_IDENTITY_POOL_ID,
-      userPoolWebClientId: SNOWPACK_PUBLIC_APP_CLIENT_ID,
-    },
-    Storage: {
-      region: SNOWPACK_PUBLIC_AWS_REGION,
-      bucket: SNOWPACK_PUBLIC_CLIENT_DATA_BUCKET,
-      identityPoolId: SNOWPACK_PUBLIC_IDENTITY_POOL_ID,
-    },
-    API: {
-      endpoints: getEndpoints(['files', 'jobs']),
-    },
-    ...appSyncConfigs,
-  })
+    const {
+      data: { apiEndpointUrl },
+    } = await axios.get(`${window.location.origin}/api-config.json`)
+
+    const amplifyConfigs = {
+      Auth: {
+        mandatorySignIn: true,
+        region: region,
+        userPoolId,
+        identityPoolId,
+        userPoolWebClientId,
+      },
+      Storage: {
+        bucket: userDataBucket,
+        region,
+        identityPoolId,
+      },
+      API: {
+        endpoints: getEndpoints(['jobs'], region, apiEndpointUrl),
+      },
+      // Appsync configs
+      aws_appsync_graphqlEndpoint: graphqlEndpoints.GRAPHQL,
+      aws_appsync_region: region,
+      aws_appsync_authenticationType: 'AMAZON_COGNITO_USER_POOLS',
+    }
+
+    console.log('amplifyConfigs', amplifyConfigs)
+    Amplify.configure(amplifyConfigs)
+    return amplifyConfigs
+  } catch (error) {
+    console.error('Failed to init Amplify', error)
+  }
 }

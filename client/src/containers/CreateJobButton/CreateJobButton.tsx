@@ -34,7 +34,7 @@ export function CreateJobButton({ fileRecord }: RunJobProps): JSX.Element {
       colorScheme="teal"
       size="lg"
     >
-      Run job
+      Start job
     </Button>
   )
 }

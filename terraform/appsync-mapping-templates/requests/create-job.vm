@@ -1,0 +1,15 @@
+{
+    "version": "2017-02-28",
+    "operation": "PutItem",
+    "key": {
+        "id": $util.dynamodb.toDynamoDBJson($util.autoId()),
+        "user_id": $util.dynamodb.toDynamoDBJson($context.arguments.input.user_id)
+    },
+    "attributeValues": {
+        "input_path": $util.dynamodb.toDynamoDBJson($context.arguments.input.input_path),
+        "input_name": $util.dynamodb.toDynamoDBJson($context.arguments.input.input_name),
+        "result_path": $util.dynamodb.toDynamoDBJson($context.arguments.input.result_path),
+        "progress": $util.dynamodb.toDynamoDBJson($context.arguments.input.progress),
+        "started_at": $util.dynamodb.toDynamoDBJson($context.arguments.input.started_at),
+    }
+}

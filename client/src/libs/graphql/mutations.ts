@@ -1,8 +1,8 @@
-export const CreateFileFileRecord = `
-  mutation CreateFileFileRecord(
+export const CreateOwnFileFileRecord = `
+  mutation CreateOwnFileFileRecord(
   $input: CreateFileInput!
   ) {
-  createFile(input: $input) {
+  createOwnFile(input: $input) {
     created_at
     file_name
     file_path

@@ -32,12 +32,12 @@ const getElapsedTime = (startedAt: number): string =>
   })
 
 export const JobRow = ({ data, index, style }: JobRowProps): JSX.Element => {
-  const { progress, started_at, input_name, result_path } = data[index]
+  const { progress, started_at, input_name, result_path, id } = data[index]
   const progressPercentage = progress * 100
   const elapsedTime =
     started_at && !result_path ? getElapsedTime(started_at) : null
   return (
-    <div style={style}>
+    <div style={style} key={id}>
       <Flex
         marginBottom="1rem"
         padding="0.5rem"

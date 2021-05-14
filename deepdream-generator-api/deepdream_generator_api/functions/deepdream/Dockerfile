@@ -6,5 +6,5 @@ COPY ./functions/deepdream/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
 COPY ./functions/deepdream/*.py ./deepdream_generator_api/functions/deepdream/
-COPY ./libs/*.py ./deepdream_generator_api/libs/
-COPY ./models/*.py ./deepdream_generator_api/models/
+COPY ./libs/ ./deepdream_generator_api/libs/
+COPY ./models/ ./deepdream_generator_api/models/

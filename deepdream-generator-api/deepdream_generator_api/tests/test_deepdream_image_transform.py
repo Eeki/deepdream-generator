@@ -14,6 +14,7 @@ s3 = get_resource('s3')
 sqs = get_resource('sqs')
 
 
+# TODO fix and monkeypatch this test
 class TestDeepdreamImageTransform(object):
     def test_image_transform(self, create_s3_bucket, create_s3_files, job_table, file_record_table):
         user_id = '123-user-abc'
@@ -50,7 +51,24 @@ class TestDeepdreamImageTransform(object):
         })
 
         sqs_message_event = {
-            'body': body
+            "Records": [
+                {
+                    "messageId": "1224bd6e-c13d-4c06-b977-1cf54eddfafc",
+                    "receiptHandle": "ABC",
+                    "body": body,
+                    "attributes": {
+                        "ApproximateReceiveCount": "1",
+                        "SentTimestamp": "1619898591718",
+                        "SenderId": "AROAABB:deepdream-generator-api-dev-job-create",
+                        "ApproximateFirstReceiveTimestamp": "1619898591726"
+                    },
+                    "messageAttributes": {},
+                    "md5OfBody": "abcd",
+                    "eventSource": "aws:sqs",
+                    "eventSourceARN": "arn:aws:sqs:eu-north-1:123:job-queue",
+                    "awsRegion": "eu-north-1"
+                }
+            ]
         }
 
         context = Context(54000)

@@ -3,10 +3,8 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import App from './containers/App/App'
-import { setupAmplify } from '@libs/amplifyLib'
+import { amplifyConfigure } from '@libs/amplifyLib'
 import './index.css'
-
-setupAmplify()
 
 const colors = {
   brand: {
@@ -18,15 +16,19 @@ const colors = {
 
 const theme = extendTheme({ colors })
 
-ReactDOM.render(
-  <React.StrictMode>
-    <ChakraProvider theme={theme} resetCSS={true}>
-      <Router>
-        <App />
-      </Router>
-    </ChakraProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
+amplifyConfigure().then(
+  amplifyConfigs =>
+    ReactDOM.render(
+      <React.StrictMode>
+        <ChakraProvider theme={theme} resetCSS={true}>
+          <Router>
+            <App amplifyConfigs={amplifyConfigs} />
+          </Router>
+        </ChakraProvider>
+      </React.StrictMode>,
+      document.getElementById('root')
+    ),
+  error => alert(`Failed to initialize the app. ${error}`)
 )
 
 if (import.meta.hot) {

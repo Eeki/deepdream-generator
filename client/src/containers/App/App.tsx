@@ -7,11 +7,17 @@ import { onError } from '@libs/errorLib'
 import { Header } from '@components/Header'
 import { Routes } from '../../Routes'
 import './App.css'
+import type { UserInfo, AmplifyConfigs } from '@libs/types'
 
-function App(): JSX.Element {
+interface AppProps {
+  amplifyConfigs?: AmplifyConfigs
+}
+
+function App({ amplifyConfigs }: AppProps): JSX.Element {
   const history = useHistory()
   const [isAuthenticating, setIsAuthenticating] = useState(true)
   const [isAuthenticated, userHasAuthenticated] = useState(false)
+  const [user, setUser] = useState<UserInfo | undefined>()
 
   useEffect(() => {
     onLoad()
@@ -20,6 +26,9 @@ function App(): JSX.Element {
   async function onLoad() {
     try {
       await Auth.currentSession()
+      const userInfo = await Auth.currentUserInfo()
+      console.log('userInfo', userInfo)
+      setUser(userInfo)
       userHasAuthenticated(true)
     } catch (e) {
       if (e !== 'No current user') {
@@ -39,7 +48,9 @@ function App(): JSX.Element {
 
   return (
     <div className="App">
-      <AppContext.Provider value={{ isAuthenticated, userHasAuthenticated }}>
+      <AppContext.Provider
+        value={{ isAuthenticated, userHasAuthenticated, user, amplifyConfigs }}
+      >
         <Header isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
         {isAuthenticating ? (
           <Center h="100%" w="100%">
@@ -60,5 +71,3 @@ function App(): JSX.Element {
 }
 
 export default App
-
-// TODO continue this: https://serverless-stack.com/chapters/add-the-create-note-page.html

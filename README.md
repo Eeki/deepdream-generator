@@ -5,43 +5,15 @@ OR THIS: https://hackernoon.com/deep-dream-with-tensorflow-a-practical-guide-to-
 # How to combine terraform and SAM
 https://dev.to/rolfstreefkerk/how-to-setup-a-serverless-application-with-aws-sam-and-terraform-33m9
 
-# Cognito
-
-### Creating cognito user pool
-https://serverless-stack.com/chapters/create-a-cognito-user-pool.html
-
-### Create a user
-First, we will use AWS CLI to sign up a user with their email and password.
-
-```shell
-aws cognito-idp sign-up \
-  --region eu-north-1 \
-  --client-id h060l9kpjb2vkpsblo0b097d5 \
-  --username admin@example.com \
-  --password Passw0rd!
-```
-
-Now, the user is created in Cognito User Pool. However, before the user can authenticate with the User Pool, the account needs to be verified. Let’s quickly verify the user using an administrator command.
-
-```shell
-aws cognito-idp admin-confirm-sign-up \
-  --region eu-north-1 \
-  --user-pool-id eu-north-1_sIbi8xvI8 \
-  --username admin@example.com
-```
-
-### Create a Cognito Identity Pool
-https://serverless-stack.com/chapters/create-a-cognito-identity-pool.html
-
 
 ## Ideas
 - We don't need serverless. Use SAM with Terraform
+  - https://medium.com/geekculture/complete-end-to-end-guide-for-developing-dockerized-lambda-in-typescript-terraform-and-sam-cli-ecdea1c6e72c
   - https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started-hello-world.html
 - Käytä cloudfront:ia ui:n jakeluun.
 - Nykyään lambdan voi deployata myös docker imagena. Workerit voisivat ollakkin siis vain lambda workereita fargate sijaan
   -  https://acloudguru.com/blog/engineering/packaging-aws-lambda-functions-as-container-images
   - Toteuta vain ne apit joiden pitää syystä tai toisesta olla toteutettu docker:illa dokcerilla, koska Zip deploy on yksinkertaisempi prosessi kuin docker deploy
-
 
 
 # Localstack
@@ -94,3 +66,17 @@ https://docs.aws.amazon.com/appsync/latest/devguide/resolver-mapping-template-re
 
 # TODO STYLING:
 - When page works technically read through the refactroing-ui book and do style refactor to the app
+
+
+# TODO
+UI:
+  - Draw design in Figma
+  - Add isResult field to File
+  - Add possibility to change multiple different kind of jobs to run
+BACKEND:
+- Deep dream image algorithm
+  - one lambda per image
+- Deep dream video algorithm
+  - Start job that will split the video to images
+  - orchestrate the images to be going through the Deep dream image algorithm
+  - combine the transformed images to video

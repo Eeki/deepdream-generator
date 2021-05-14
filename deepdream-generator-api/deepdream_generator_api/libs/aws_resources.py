@@ -39,7 +39,7 @@ def s3_read_file(s3_resource, bucket_name: str, file_path: str) -> io.BytesIO:
 
 
 def get_users_private_file_path(user_id: str, file_name: str):
-    return f"private/{os.environ.get('AWS_REGION')}:{user_id}/{file_name}"
+    return f"private/{user_id}/{file_name}"
 
 
 def s3_write_private_file(
@@ -50,6 +50,7 @@ def s3_write_private_file(
         buffer: io.BytesIO,
         random_prefix=True
 ) -> str:
+    # TODO remove whitespaces from file_name
     s3_file_name = f"{uuid.uuid4()}-{file_name}" if random_prefix else file_name
     s3_file_path = get_users_private_file_path(user_id, s3_file_name)
     s3_resource.Object(bucket_name, s3_file_path).put(
