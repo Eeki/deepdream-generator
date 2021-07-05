@@ -1,5 +1,5 @@
 import React, { FormEvent, useState } from 'react'
-import { Auth } from 'aws-amplify'
+import Auth from '@aws-amplify/auth'
 import {
   FormControl,
   FormLabel,
@@ -10,7 +10,7 @@ import {
 import { useHistory } from 'react-router-dom'
 import { LoaderButton } from '@components/LoaderButton'
 import { useAppContext } from '@libs/contextLib'
-import { useFormFields } from '@libs/formHooksLib'
+import { useFormFields } from '@libs/hooks/form'
 import { onError } from '@libs/errorLib'
 import './Signup.css'
 

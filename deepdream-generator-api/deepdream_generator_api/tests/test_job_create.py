@@ -1,10 +1,9 @@
 import json
 from deepdiff import DeepDiff
-from lambda_local.main import call
-from lambda_local.context import Context
 
 from deepdream_generator_api.libs import appsync
-from deepdream_generator_api.tests.mocks import mock_gql_client
+from deepdream_generator_api.libs.data.deepdream import DeepdreamParams
+from deepdream_generator_api.tests.mocks import GqlMockClient
 
 
 class TestJobCreate:
@@ -12,9 +11,11 @@ class TestJobCreate:
         input_path = '1b74a419-b419-40a4-9fb5-dbf355db2b96-beach.jpg'
         input_name = 'foo.jpg'
         user_id = '123456'
+        params = DeepdreamParams().as_dict()
         body = json.dumps({
             'input_path': input_path,
-            'input_name': input_name
+            'input_name': input_name,
+            'params': params
         })
         event = {
             'requestContext': {
@@ -27,32 +28,35 @@ class TestJobCreate:
             'body': body
 
         }
-        context = Context(54000)
 
         expected_job = {
             'user_id': user_id,
+            'params': params,
             'input_path': input_path,
             'input_name': input_name,
             'id': '123-456-789',
             'progress': 0
         }
 
-        expected_qgl_result = {
-            'createJob': expected_job
+        gql_responses = {
+            'CreateJob': {
+                'createJob': expected_job
+            }
         }
 
         # Monkey patch appsync client because appsync is not included in the free localstack
-        monkeypatch.setattr(appsync, 'make_appsync_client', mock_gql_client(expected_qgl_result))
+        appsync_client = GqlMockClient(responses=gql_responses)
+        monkeypatch.setattr(appsync, 'make_appsync_client', lambda: appsync_client)
 
-        # This is little hackish but create job lambda need to be imported after the monkeypatch
+        # This is little hackish but the lambda handler need to be imported after the monkeypatch
         from deepdream_generator_api.functions.jobs import create
 
         # When calling create job handler as authenticated user and with correct body
-        response = call(create.main, event, context)
+        response = create.main(event, None)
 
         # Response has status code of 200 and a serialized Job
-        assert response[0]['statusCode'] == 200
-        job = json.loads(response[0]['body'])
+        assert response['statusCode'] == 200
+        job = json.loads(response['body'])
 
         # Serialized Job is as expected
         assert not DeepDiff(expected_job, job, ignore_order=True)
@@ -69,3 +73,15 @@ class TestJobCreate:
         # Message from job queue is as expected
         message = json.loads(messages[0].body)
         assert not DeepDiff(expected_message, message, ignore_order=True)
+
+        # Correct gql requests are made
+        assert dict(appsync_client.recorded_inputs) == {
+            'CreateJob': [
+                {'input': {
+                    'user_id': '123456',
+                    'params': params,
+                    'input_path': '1b74a419-b419-40a4-9fb5-dbf355db2b96-beach.jpg',
+                    'input_name': 'foo.jpg'
+                }}
+            ]
+        }

@@ -1,9 +1,15 @@
 {
   "type": "object",
   "title": "Create job post request",
-  "required": ["input_path"],
+  "required": ["input_path", "input_name", "params"],
   "properties": {
-    "file_path": {
+    "input_path": {
+      "type": "string"
+    },
+    "input_name": {
+      "type": "string"
+    },
+    "params": {
       "type": "string"
     }
   }

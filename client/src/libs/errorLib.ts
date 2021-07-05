@@ -1,4 +1,6 @@
-// TODO don't work with graphql
+import { createStandaloneToast } from '@chakra-ui/react'
+
+const toast = createStandaloneToast()
 
 export function onError(error?: Error | Record<string, string>): void {
   let message = error?.toString()
@@ -12,5 +14,11 @@ export function onError(error?: Error | Record<string, string>): void {
     message = 'Something went wrong'
   }
 
-  alert(message)
+  toast({
+    title: 'An error occurred.',
+    description: message,
+    status: 'error',
+    duration: 5000,
+    isClosable: true,
+  })
 }

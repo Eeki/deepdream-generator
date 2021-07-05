@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Auth } from 'aws-amplify'
-import { Center, Spinner } from '@chakra-ui/react'
+import Auth from '@aws-amplify/auth'
+import { Center } from '@chakra-ui/react'
 import { AppContext } from '@libs/contextLib'
 import { onError } from '@libs/errorLib'
 import { Header } from '@components/Header'
+import { Spinner } from '@components/Spinner'
 import { Routes } from '../../Routes'
 import './App.css'
 import type { UserInfo, AmplifyConfigs } from '@libs/types'
@@ -27,10 +28,10 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
     try {
       await Auth.currentSession()
       const userInfo = await Auth.currentUserInfo()
-      console.log('userInfo', userInfo)
       setUser(userInfo)
       userHasAuthenticated(true)
     } catch (e) {
+      // TODO why this is done like this :D
       if (e !== 'No current user') {
         onError(e)
       }
@@ -41,7 +42,6 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
 
   async function handleLogout() {
     await Auth.signOut()
-
     userHasAuthenticated(false)
     history.push('/login')
   }
@@ -54,13 +54,7 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
         <Header isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
         {isAuthenticating ? (
           <Center h="100%" w="100%">
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="teal.500"
-              size="xl"
-            />
+            <Spinner />
           </Center>
         ) : (
           <Routes />

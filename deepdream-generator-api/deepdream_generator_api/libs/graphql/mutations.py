@@ -6,6 +6,7 @@ create_job = gql(
       createJob(input: $input) {
         id
         user_id
+        params
         input_path
         input_name
         progress
@@ -22,6 +23,7 @@ update_job = gql(
       updateJob(input: $input) {
         id
         user_id
+        params
         input_path
         input_name
         progress
@@ -40,6 +42,7 @@ create_file_record = gql(
         file_name
         file_path
         created_at
+        type
       }
     }
 """

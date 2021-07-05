@@ -1,35 +1,31 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Flex, Image, Spacer, Text } from '@chakra-ui/react'
 
-import type { ListChildComponentProps } from 'react-window'
-import { s3PrivateGet } from '@libs/awsS3Lib'
+import { ImagePreview } from '@components/ImagePreview'
+import { useS3PrivateLink } from '@libs/hooks/s3'
 import type { FileRecord } from '@libs/types'
 
-interface FileRecordData {
-  fileRecords: FileRecord[]
-  onSelectedFileRecordChange: (event: FileRecord) => void
-  selectedFileRecord?: FileRecord
-}
+interface FileRowProps {
+  fileRecord: FileRecord
 
-interface FileRowProps extends ListChildComponentProps {
-  data: FileRecordData
-  index: number
+  setSelectedFileRecord: (fileRecord: FileRecord) => void
+  removeFileRecord: (filePath: string) => Promise<boolean>
+  selectedFileRecord?: FileRecord
   style: any
 }
 
-export const FileRow = ({ data, index, style }: FileRowProps): JSX.Element => {
-  const [fileUrl, setFileUrl] = useState('')
-  const { fileRecords, onSelectedFileRecordChange, selectedFileRecord } = data
-  const fileRecord = fileRecords[index]
+// TODO: Prevent fileRow selection when clicking the image.
+//  Add hover to indicate that the image can be clicked.
 
-  useEffect(() => {
-    fetchFileLink()
-  }, [fileRecord.file_path])
-
-  async function fetchFileLink() {
-    const url = await s3PrivateGet(fileRecord.file_path)
-    setFileUrl(url)
-  }
+export const FileRow = ({
+  fileRecord,
+  setSelectedFileRecord,
+  removeFileRecord,
+  selectedFileRecord,
+  style,
+}: FileRowProps): JSX.Element => {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const fileUrl = useS3PrivateLink(fileRecord.file_path)
 
   return (
     <div style={style} key={fileRecord.file_path}>
@@ -40,7 +36,7 @@ export const FileRow = ({ data, index, style }: FileRowProps): JSX.Element => {
         borderWidth="1px"
         overflow="hidden"
         borderRadius="base"
-        onClick={() => onSelectedFileRecordChange(fileRecord)}
+        onClick={() => setSelectedFileRecord(fileRecord)}
         background={
           selectedFileRecord?.file_path === fileRecord.file_path
             ? 'teal.400'
@@ -55,8 +51,24 @@ export const FileRow = ({ data, index, style }: FileRowProps): JSX.Element => {
           <Text align="left">{fileRecord.file_name}</Text>
         </Flex>
         <Spacer />
-        <Image objectFit="cover" src={fileUrl} borderRadius="base" />
+        <Image
+          onClick={() => {
+            setIsPreviewOpen(true)
+          }}
+          width="33%"
+          objectFit="cover"
+          src={fileUrl}
+          borderRadius="base"
+        />
       </Flex>
+      {/* TODO have only one ImagePreview that is not a children
+          of a row but for the Image Browser */}
+      <ImagePreview
+        fileRecord={fileRecord}
+        isOpen={isPreviewOpen}
+        closePreview={() => setIsPreviewOpen(false)}
+        removeFileRecord={removeFileRecord}
+      />
     </div>
   )
 }

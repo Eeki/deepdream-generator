@@ -2,10 +2,12 @@ input CreateFileInput {
     user_id: String!
     file_path: String!
     file_name: String!
+    type: String!
 }
 
 input CreateJobInput {
     user_id: String!
+    params: String!
     input_path: String
     input_name: String
     result_path: String
@@ -18,11 +20,13 @@ type File @aws_cognito_user_pools @aws_iam {
     user_id: String!
     file_name: String
     created_at: Float
+    type: String
 }
 
 type Job @aws_cognito_user_pools @aws_iam {
     user_id: String!
     id: String!
+    params: String!
     input_path: String
     input_name: String
     result_path: String
@@ -43,10 +47,10 @@ type FileConnection {
 type Mutation {
     createOwnFile(input: CreateFileInput!): File
     @aws_cognito_user_pools
+    deleteOwnFile(file_path: String!): File
+    @aws_cognito_user_pools
     createFile(input: CreateFileInput!): File
     @aws_iam
-
-    # TODO separate lambda createFile Mutation with @aws_iam access
 
     createJob(input: CreateJobInput!): Job
     @aws_iam
@@ -139,6 +143,7 @@ input FileFilterInput {
     user_id: StringFilterInput
     file_name: StringFilterInput
     created_at: FloatFilterInput
+    type: StringFilterInput
 }
 
 input StringFilterInput {

@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Auth, JS } from 'aws-amplify'
+import Auth from '@aws-amplify/auth'
 import {
   FormControl,
   FormLabel,
@@ -9,11 +9,12 @@ import {
   InputRightElement,
   Button,
   Stack,
+  Select,
 } from '@chakra-ui/react'
 import { LoaderButton } from '@components/LoaderButton'
 import { useAppContext } from '@libs/contextLib'
 import { onError } from '@libs/errorLib'
-import { useFormFields } from '@libs/formHooksLib'
+import { useFormFields } from '@libs/hooks/form'
 import './Login.css'
 
 export default function Login(): JSX.Element {

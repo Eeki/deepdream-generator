@@ -39,7 +39,6 @@ resource "aws_s3_bucket_public_access_block" "public_client_bucket" {
   bucket             = aws_s3_bucket.public_client_bucket.id
   ignore_public_acls = true
   block_public_acls  = true
-
 }
 
 resource "aws_s3_bucket_policy" "public_client_policy" {
@@ -323,11 +322,12 @@ resource "aws_sqs_queue" "job_queue_deadletter" {
 }
 
 resource "aws_sqs_queue" "job_queue" {
-  name                      = "job-queue"
-  message_retention_seconds = 86400
+  name                       = "job-queue"
+  message_retention_seconds  = 86400
+  visibility_timeout_seconds = 120
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.job_queue_deadletter.arn
-    maxReceiveCount     = 3
+    maxReceiveCount     = 2
   })
 
   tags = {
@@ -446,6 +446,15 @@ resource "aws_appsync_resolver" "deepdreams_create_own_file" {
   type              = "Mutation"
   field             = "createOwnFile"
   request_template  = file("appsync-mapping-templates/requests/create-own-file-record.vm")
+  response_template = file("appsync-mapping-templates/responses/single.vm")
+}
+
+resource "aws_appsync_resolver" "deepdreams_delete_own_file" {
+  api_id            = aws_appsync_graphql_api.deepdreams.id
+  data_source       = aws_appsync_datasource.deepdreams_file_records.name
+  type              = "Mutation"
+  field             = "deleteOwnFile"
+  request_template = file("appsync-mapping-templates/requests/delete-own-file-record.vm")
   response_template = file("appsync-mapping-templates/responses/single.vm")
 }
 
@@ -579,6 +588,12 @@ resource "aws_ssm_parameter" "sqs_queue_job_name" {
   name = "/deepdreams/sqs/queue/job/name"
   type = "String"
   value = aws_sqs_queue.job_queue.name
+}
+
+resource "aws_ssm_parameter" "sqs_queue_job_url" {
+  name = "/deepdreams/sqs/queue/job/url"
+  type = "String"
+  value = aws_sqs_queue.job_queue.id # Url is id of queue
 }
 
 resource "aws_ssm_parameter" "cognito_userpool_arn" {

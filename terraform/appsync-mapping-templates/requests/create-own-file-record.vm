@@ -19,7 +19,8 @@
     },
     "attributeValues": {
         "file_name": $util.dynamodb.toDynamoDBJson($ctx.args.input.file_name),
-        "created_at": $util.dynamodb.toDynamoDBJson($util.time.nowEpochMilliSeconds())
+        "created_at": $util.dynamodb.toDynamoDBJson($util.time.nowEpochMilliSeconds()),
+        "type": $util.dynamodb.toDynamoDBJson($ctx.args.input.type)
     },
 }
 #else

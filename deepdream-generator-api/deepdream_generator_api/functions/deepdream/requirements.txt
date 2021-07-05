@@ -3,3 +3,6 @@ tensorflow
 Pillow
 requests_aws4auth
 gql
+scipy
+matplotlib
+numpy

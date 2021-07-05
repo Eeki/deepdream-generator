@@ -6,6 +6,7 @@ get_job = gql(
       getJob(user_id: $user_id, id: $id) {
         id
         user_id
+        params
         input_path
         input_name
         progress

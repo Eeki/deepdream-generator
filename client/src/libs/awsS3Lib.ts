@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { Storage } from 'aws-amplify'
+import Storage from '@aws-amplify/storage'
 import type { UserInfo } from '@libs/types'
 
 export interface UploadResult {
@@ -10,6 +10,10 @@ export interface UploadResult {
 interface s3VaultCacheItem {
   timeStamp: Date
   url: string
+}
+
+interface StorageGetResponse {
+  Body: Blob | string
 }
 
 const s3Cache: Record<string, s3VaultCacheItem> = {}
@@ -23,7 +27,6 @@ export async function s3PrivateUpload(
   if (!bucketName) {
     throw new Error('S3 bucket is not configured.')
   }
-  console.log('user', user)
   if (!user?.username) {
     throw new Error('Cannot get current user. Please log out and try again.')
   }
@@ -31,7 +34,6 @@ export async function s3PrivateUpload(
   const s3FilePath = `private/${user.username}/${uuidv4()}-${
     file.name
   }`.replace(/\s+/g, '')
-  console.log('s3FilePath', s3FilePath)
   await Storage.put(s3FilePath, file, {
     contentType: file.type,
     customPrefix: {
@@ -53,12 +55,14 @@ export async function s3PrivateGet(filePath: string): Promise<string> {
     }
   }
 
-  const url = (await Storage.get(filePath, {
-    expires: 300,
+  const result = (await Storage.get(filePath, {
+    expires: 900,
+    download: true,
     customPrefix: {
       public: '',
     },
-  })) as string
+  })) as StorageGetResponse
+  const url = URL.createObjectURL(result.Body)
   s3Cache[filePath] = { timeStamp: new Date(), url }
   return url
 }

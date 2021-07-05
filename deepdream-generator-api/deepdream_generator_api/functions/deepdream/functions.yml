@@ -1,5 +1,7 @@
 deepdream-image:
   reservedConcurrency: 100
+  memorySize: 3000
+  timeout: 360 # 6 minutes
   image:
     name: deepdream-image
     command:
@@ -33,10 +35,17 @@ deepdream-image:
         - ${ssm:/deepdreams/appsync/arn}/types/Query/fields/getJob
         - ${ssm:/deepdreams/appsync/arn}/types/Mutation/fields/updateJob
         - ${ssm:/deepdreams/appsync/arn}/types/Mutation/fields/createFile
+    - Effect: Allow
+      Action:
+        - sqs:ChangeMessageVisibility
+      Resource:
+        - ${ssm:/deepdreams/sqs/queue/job/arn}
   environment:
     S3_FILE_BUCKET_ID: ${ssm:/deepdreams/s3/bucket/user-data/name}
     APPSYNC_ENDPOINT: ${ssm:/deepdreams/appsync/endpoint/graphql}
-
+    SQS_JOB_QUEUE_URL: ${ssm:/deepdreams/sqs/queue/job/url}
+    # Matplotlib temporary config/cache directory
+    MPLCONFIGDIR: /tmp/matplotlib
   events:
     - sqs:
         arn: ${ssm:/deepdreams/sqs/queue/job/arn}

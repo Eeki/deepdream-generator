@@ -1,4 +1,6 @@
-import { Amplify, Auth } from 'aws-amplify'
+import Amplify from '@aws-amplify/core'
+import Auth from '@aws-amplify/auth'
+import API from '@aws-amplify/api'
 import axios from 'axios'
 import type { ApiEndpoint, AmplifyConfigs } from './types'
 
@@ -51,17 +53,14 @@ export const amplifyConfigure = async (): Promise<
         region,
         identityPoolId,
       },
-      API: {
-        endpoints: getEndpoints(['jobs'], region, apiEndpointUrl),
-      },
       // Appsync configs
       aws_appsync_graphqlEndpoint: graphqlEndpoints.GRAPHQL,
       aws_appsync_region: region,
       aws_appsync_authenticationType: 'AMAZON_COGNITO_USER_POOLS',
     }
 
-    console.log('amplifyConfigs', amplifyConfigs)
     Amplify.configure(amplifyConfigs)
+    API.configure({ endpoints: getEndpoints(['jobs'], region, apiEndpointUrl) })
     return amplifyConfigs
   } catch (error) {
     console.error('Failed to init Amplify', error)

@@ -1,0 +1,8 @@
+{
+    "version": "2018-05-29",
+    "operation": "DeleteItem",
+    "key": {
+        "user_id": $util.dynamodb.toDynamoDBJson($ctx.identity.username),
+        "file_path": $util.dynamodb.toDynamoDBJson($ctx.args.file_path)
+    }
+}

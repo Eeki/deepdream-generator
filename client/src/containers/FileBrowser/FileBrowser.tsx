@@ -1,136 +1,114 @@
-import React, { useRef, useState, useEffect, ChangeEvent } from 'react'
-import get from 'lodash/get'
-import sortBy from 'lodash/sortBy'
-import { Box, Center } from '@chakra-ui/react'
-import { API, graphqlOperation } from 'aws-amplify'
+import React, { useCallback } from 'react'
+import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { FileUpload } from '@components/FileUpload'
 import { FileList } from '@components/FileList'
-import { useAppContext } from '@libs/contextLib'
-import { onError } from '@libs/errorLib'
-import { s3PrivateUpload, UploadResult } from '@libs/awsS3Lib'
-import { ListUserFileRecords } from '@libs/graphql/queries'
-import { CreateOwnFileFileRecord } from '@libs/graphql/mutations'
-import type { FileRecord } from '@libs/types'
-import { onCreateFile } from '@libs/graphql/subscriptions'
-
-// TODO Should this be in .env
-const MAX_ATTACHMENT_SIZE = 50000000
+import { Spinner } from '@components/Spinner'
+import { useFileRecords } from '@libs/hooks/fileRecords'
+import { FileRecord, FileRecordType } from '@libs/types'
+import { useJobs } from '@libs/hooks/jobs'
 
 interface FileBrowserProps {
-  onSelectedFileRecordChange: (fileRecord: FileRecord) => void
+  setSelectedFileRecord: (fileRecord?: FileRecord) => void
   selectedFileRecord?: FileRecord
 }
+
+const tabs = [
+  { label: 'All', type: 'all' },
+  { label: 'Uploaded files', type: 'uploaded' },
+  { label: 'Results', type: 'result' },
+]
 
 // TODO do the empty list case: (add min height and some message e.g "no uploaded files")
 // TODO remove file case
 
 // TODO make the upload like it is here https://codesandbox.io/s/4tv8g
 export function FileBrowser({
-  onSelectedFileRecordChange,
+  setSelectedFileRecord,
   selectedFileRecord,
 }: FileBrowserProps): JSX.Element {
-  const file = useRef<File>(null)
-  const { user, amplifyConfigs } = useAppContext()
-  const [isLoading, setIsLoading] = useState(false)
-  const [fileRecords, setFileRecords] = useState<FileRecord[]>([])
+  const [tabIndex, setTabIndex] = React.useState(0)
+  // const [activeJobs, setActiveJobs] = React.useState<Job[]>([])
+  const {
+    fileRecords,
+    isLoading: areFileRecordsLoading,
+    deleteFileRecord,
+  } = useFileRecords()
+  const { jobs, isLoading: areJobsLoading } = useJobs()
 
-  // ToDo create custom hook from fetching and subscribeing files
-  useEffect(() => {
-    fetchFileRecords()
-    const onCreateFleRecordSubscription = subscribeOnCreateFile()
-    return () => onCreateFleRecordSubscription.unsubscribe()
-  }, [])
-
-  async function fetchFileRecords(): Promise<void> {
-    const response = await API.graphql(graphqlOperation(ListUserFileRecords))
-    const fileRecords = get(response, 'data.listUserFiles.items', [])
-    const sortedFileRecords = sortBy(fileRecords, 'order_by')
-    setFileRecords(sortedFileRecords)
-  }
-
-  async function handleFileUpload(
-    event: ChangeEvent<HTMLInputElement>
-  ): Promise<void> {
-    console.log('event', event)
-    // TODO make this work with multiple files
-    event.preventDefault()
-
-    if (!event?.target?.files?.length) {
-      return
+  const getFileRecords = useCallback(() => {
+    const type = tabs[tabIndex].type
+    if (type === 'uploaded') {
+      return fileRecords.filter(({ type }) => type === FileRecordType.UPLOAD)
     }
-
-    if (file.current && file.current.size > MAX_ATTACHMENT_SIZE) {
-      alert(
-        `Please pick a file smaller than ${MAX_ATTACHMENT_SIZE / 1000000} MB.`
-      )
-      return
+    if (type === 'result') {
+      return fileRecords.filter(({ type }) => type === FileRecordType.RESULT)
     }
+    return fileRecords
+  }, [fileRecords, tabIndex])
 
-    setIsLoading(true)
-
-    try {
-      const uploadResult = await s3PrivateUpload(
-        event?.target?.files[0],
-        user,
-        amplifyConfigs?.Storage?.bucket
-      )
-      await createFileRecord(uploadResult)
-      // TODO add down load indicator to the file list like it is here https://codesandbox.io/s/4tv8g
-    } catch (e) {
-      // TODO show errors in a Toast component
-      onError(e)
-    } finally {
-      // Set the file input to empty so all files will trigger the onChange event
-      event.target.value = ''
-      setIsLoading(false)
+  const getJobs = useCallback(() => {
+    const type = tabs[tabIndex].type
+    if (type === 'uploaded') {
+      return []
     }
-  }
+    return jobs.filter(({ progress }) => progress < 1)
+  }, [jobs, tabIndex])
 
-  async function createFileRecord(uploadResult: UploadResult): Promise<void> {
-    await API.graphql(
-      graphqlOperation(CreateOwnFileFileRecord, {
-        input: { user_id: user?.username, ...uploadResult },
-      })
-    )
-  }
-
-  // TODO Adding one item to the the list will some how break the
-  function subscribeOnCreateFile(): any {
-    return API.graphql(
-      graphqlOperation(onCreateFile, { user_id: user?.username })
-    ).subscribe({
-      next: ({ provider, value }) => {
-        console.log('subscription', { provider, value })
-        const newFileRecord = value?.data?.onCreateFile as FileRecord
-        if (newFileRecord) {
-          setFileRecords(fileRecords => [newFileRecord, ...fileRecords])
-        }
-      },
-      error: error => console.warn('subscription error', error),
-    })
-  }
+  const removeFileRecord = useCallback(
+    async (file_path: string): Promise<boolean> => {
+      const success = await deleteFileRecord(file_path)
+      if (!success) {
+        return false
+      }
+      if (selectedFileRecord?.file_path === file_path) {
+        setSelectedFileRecord(undefined)
+      }
+      return true
+    },
+    []
+  )
 
   return (
-    <Center height="100%" width="100%" marginTop="3rem">
-      <Box
-        boxShadow="2xl"
-        direction="column"
-        w="md"
-        borderWidth="1.1px"
-        borderRadius="lg"
-        overflow="hidden"
-        padding="1rem"
+    <Box
+      position="relative"
+      boxShadow="2xl"
+      direction="column"
+      w="md"
+      borderWidth="1.1px"
+      borderRadius="lg"
+      overflow="hidden"
+      padding="1rem"
+      marginLeft="2rem"
+      marginBottom="4rem"
+      height="700px"
+    >
+      {/* TODO add loading spinner when loading initial fileRecords */}
+      <Tabs
+        index={tabIndex}
+        onChange={index => setTabIndex(index)}
+        isFitted
+        marginBottom="1rem"
       >
-        {/* TODO add loading spinner when loading initial fileRecords */}
+        <TabList>
+          {tabs.map(({ label, type }) => (
+            <Tab key={type}>{label}</Tab>
+          ))}
+        </TabList>
+      </Tabs>
+      {areFileRecordsLoading || areJobsLoading ? (
+        <Spinner />
+      ) : (
         <FileList
-          fileRecords={fileRecords}
-          onSelectedFileRecordChange={onSelectedFileRecordChange}
+          fileRecords={getFileRecords()}
+          jobs={getJobs()}
+          setSelectedFileRecord={setSelectedFileRecord}
+          removeFileRecord={removeFileRecord}
           selectedFileRecord={selectedFileRecord}
         />
-        <FileUpload isLoading={isLoading} handleFileChange={handleFileUpload}>
-          Click to Upload
-        </FileUpload>
+      )}
+      <Box position="absolute" left={0} right={0} bottom={0} padding="1rem">
+        <FileUpload>Click to Upload</FileUpload>
       </Box>
-    </Center>
+    </Box>
   )
 }

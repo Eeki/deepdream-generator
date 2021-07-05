@@ -29,6 +29,3 @@ Run with the `--watch` flag (`npm test -- --watch`) to run in interactive watch 
 - https://github.com/typescript-cheatsheets/react
 - https://github.com/labs42io/clean-code-typescript
 
-
-# TODO: 
-- Jäit tähän: https://serverless-stack.com/chapters/load-the-state-from-the-session.html

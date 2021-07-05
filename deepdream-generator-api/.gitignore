@@ -7,3 +7,4 @@ __pycache__/
 *.py[cod]
 .python-version
 deepdream_generator_api/notebooks
+deepdream_generator_api/tests/inception

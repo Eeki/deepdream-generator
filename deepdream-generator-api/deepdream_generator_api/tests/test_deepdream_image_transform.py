@@ -1,22 +1,43 @@
 import os
 import json
+import uuid
+import time
 from pathlib import Path
-from lambda_local.main import call
-from lambda_local.context import Context
 
-from deepdream_generator_api.functions.deepdream import deepdream_image_transform
 from deepdream_generator_api.libs.aws_resources import get_resource, get_users_private_file_path
 from deepdream_generator_api.tests.fixtures.s3 import S3FileUploadItem
 from deepdream_generator_api.models.Job import Job
-from deepdream_generator_api.models.FileRecord import FileRecord
+from deepdream_generator_api.libs import appsync
+from deepdream_generator_api.tests.mocks import GqlMockClient
+from deepdream_generator_api.tests.test_data.gql_requests import request_inputs1
 
 s3 = get_resource('s3')
 sqs = get_resource('sqs')
 
+constant_uuid = uuid.UUID('123e4567-e89b-12d3-a456-426655440000')
 
-# TODO fix and monkeypatch this test
+
+def patch_uuid():
+    return constant_uuid
+
+
+def patch_time():
+    return 1000000000
+
+
+# TODO mockeypatch the deepdream function to just return some image.
+# This test should not test the actual deepdream algorithm
+
 class TestDeepdreamImageTransform(object):
-    def test_image_transform(self, create_s3_bucket, create_s3_files, job_table, file_record_table):
+    def test_image_transform(
+            self,
+            monkeypatch,
+            create_s3_bucket,
+            create_s3_files,
+            job_table,
+            file_record_table,
+            job_queue
+    ):
         user_id = '123-user-abc'
         user_file_bucket_id = os.environ.get('S3_FILE_BUCKET_ID')
         s3_file_name = 'abc-image1.jpg'
@@ -36,6 +57,8 @@ class TestDeepdreamImageTransform(object):
             ]
         )
 
+        os.environ['SQS_JOB_QUEUE_URL'] = job_queue.url
+
         job = Job(
             id=job_id,
             user_id=user_id,
@@ -50,7 +73,7 @@ class TestDeepdreamImageTransform(object):
             'job_id': job.id,
         })
 
-        sqs_message_event = {
+        event = {
             "Records": [
                 {
                     "messageId": "1224bd6e-c13d-4c06-b977-1cf54eddfafc",
@@ -71,24 +94,34 @@ class TestDeepdreamImageTransform(object):
             ]
         }
 
-        context = Context(54000)
+        gql_responses = {
+            'GetJob': {
+                'getJob': job.to_dict()
+            },
+        }
+
+        transformed_file_path = f'private/{user_id}/{constant_uuid}-{s3_file_name}'
+
+        # Monkey patch uuid package so that function uuid.uuid4() will return always the same uuid
+        monkeypatch.setattr(uuid, 'uuid4', patch_uuid)
+
+        # Monkey path time package so that function time.time() will return always the same timestamp
+        monkeypatch.setattr(time, 'time', patch_time)
+
+        # Monkey patch appsync client because appsync is not included in the free localstack
+        appsync_client = GqlMockClient(responses=gql_responses)
+        monkeypatch.setattr(appsync, 'make_appsync_client', lambda: appsync_client)
+
+        # This is little hackish but the lambda handler need to be imported only after the monkeypatch
+        from deepdream_generator_api.functions.deepdream import deepdream_image_transform
 
         # When calling lambda with sqs message event
-        response = call(deepdream_image_transform.main, sqs_message_event, context)[0]
+        response = deepdream_image_transform.main(event, None)
+
+        # Response is ok
         assert response['statusCode'] == 200
+        # And correct qgl requests are made
+        assert dict(appsync_client.recorded_inputs) == request_inputs1
 
-        # Job is completed and has result path
-        job.refresh(consistent_read=True)
-        assert job.progress == 1
-        assert job.result_path
-
-        # new FileRecord is created for the result file
-        result_file_records = list(FileRecord.query(user_id, FileRecord.file_path == job.result_path))
-        assert len(result_file_records) == 1
-        assert result_file_records[0].file_path == job.result_path
-        assert result_file_records[0].file_name == job.input_name == s3_file_name
-        assert result_file_records[0].user_id == job.user_id == user_id
-
-        # and result file is created to s3
-        s3.Object(user_file_bucket_id, job.result_path).load()
-
+        # Result file is created to s3
+        s3.Object(user_file_bucket_id, transformed_file_path).load()

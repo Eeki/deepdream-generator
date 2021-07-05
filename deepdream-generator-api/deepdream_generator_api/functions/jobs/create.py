@@ -10,7 +10,7 @@ sqs = get_resource('sqs')
 appsync_client = make_appsync_client()
 
 
-def main(event, context):
+def main(event, _):
     data = json.loads(event['body'])
     cognito_user = get_authorized_user(event)
 
@@ -20,9 +20,9 @@ def main(event, context):
 
     graphql_params = {
         'user_id': cognito_user,
-        'input_path': data.get('input_path'),
-        'input_name': data.get('input_name'),
-        'progress': 0,
+        'params': data['params'],
+        'input_path': data['input_path'],
+        'input_name': data['input_name'],
     }
 
     response = appsync_client.execute(

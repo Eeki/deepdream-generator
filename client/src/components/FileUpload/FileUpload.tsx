@@ -1,48 +1,107 @@
-import React, { ChangeEvent, useRef } from 'react'
-import { FormControl, InputGroup, FormErrorMessage } from '@chakra-ui/react'
+import React, { ChangeEvent, useCallback, useRef, useState } from 'react'
+import { FormControl, InputGroup } from '@chakra-ui/react'
 import { DownloadIcon } from '@chakra-ui/icons'
 import { LoaderButton } from '@components/LoaderButton'
+import { s3PrivateUpload, UploadResult } from '@libs/awsS3Lib'
+import { onError } from '@libs/errorLib'
+import { useAppContext } from '@libs/contextLib'
+import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql'
+import { CreateOwnFileFileRecord } from '@libs/graphql/mutations'
+import { FileRecordType } from '@libs/types'
 
 interface FileUploadProps {
-  isLoading: boolean
-  handleFileChange: (event: ChangeEvent<HTMLInputElement>) => void
   acceptedFileTypes?: string[]
   children?: React.ReactNode
-  error?: string
 }
 
+// TODO Should this be in .env
+const MAX_ATTACHMENT_SIZE = 50000000
+
 export const FileUpload = ({
-  isLoading,
-  handleFileChange,
   acceptedFileTypes,
   children,
-  error,
 }: FileUploadProps): JSX.Element => {
+  const { user, amplifyConfigs } = useAppContext()
+  const [isLoading, setIsLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const createFileRecord = useCallback(
+    async (uploadResult: UploadResult): Promise<void> => {
+      await GraphQLAPI.graphql(
+        graphqlOperation(CreateOwnFileFileRecord, {
+          input: {
+            user_id: user?.username,
+            type: FileRecordType.UPLOAD,
+            ...uploadResult,
+          },
+        })
+      )
+    },
+    []
+  )
+
+  const handleFileUpload = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      // TODO make this work with multiple files
+      event.preventDefault()
+
+      if (!event?.target?.files?.length) {
+        return
+      }
+
+      const file = event?.target?.files[0]
+
+      if (file && file.size > MAX_ATTACHMENT_SIZE) {
+        alert(
+          `Please pick a file smaller than ${MAX_ATTACHMENT_SIZE / 1000000} MB.`
+        )
+        return
+      }
+
+      setIsLoading(true)
+
+      try {
+        const uploadResult = await s3PrivateUpload(
+          file,
+          user,
+          amplifyConfigs?.Storage?.bucket
+        )
+        await createFileRecord(uploadResult)
+        // TODO add down load indicator to the file list like it is here https://codesandbox.io/s/4tv8g
+      } catch (error) {
+        onError(error)
+      } finally {
+        // Set the file input to empty so all files will trigger the onChange event
+        event.target.value = ''
+        setIsLoading(false)
+      }
+    },
+    []
+  )
+
   return (
-    <FormControl isInvalid={Boolean(error)} isRequired paddingTop="1rem">
+    <FormControl isRequired>
       <InputGroup>
         <input
           type="file"
           accept={acceptedFileTypes?.join(', ')}
           ref={inputRef}
           style={{ display: 'none' }}
-          onChange={handleFileChange}
+          onChange={handleFileUpload}
         />
         <LoaderButton
           isLoading={isLoading}
           variant="outline"
           onClick={() => {
-            console.log('click')
             inputRef?.current?.click()
           }}
           leftIcon={<DownloadIcon />}
           width="100%"
+          size="lg"
         >
           {children}
         </LoaderButton>
       </InputGroup>
-      <FormErrorMessage>{error}</FormErrorMessage>
     </FormControl>
   )
 }

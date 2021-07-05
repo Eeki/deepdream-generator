@@ -1,42 +1,56 @@
 import React from 'react'
 import { FixedSizeList as List } from 'react-window'
 import memoize from 'memoize-one'
-import { FileRow } from './FileRow'
-import type { FileRecord } from '@libs/types'
+import { Row } from './Row'
+import type { FileRecord, Job } from '@libs/types'
 
 interface FileListProps {
   fileRecords: FileRecord[]
-  onSelectedFileRecordChange: (event: FileRecord) => void
+  jobs: Job[]
+  setSelectedFileRecord: (fileRecord: FileRecord) => void
+  removeFileRecord: (filePath: string) => Promise<boolean>
   selectedFileRecord?: FileRecord
 }
 
 const createItemData = memoize(
-  (fileRecords, onSelectedFileRecordChange, selectedFileRecord) => ({
+  (
     fileRecords,
-    onSelectedFileRecordChange,
+    jobs,
+    setSelectedFileRecord,
+    removeFileRecord,
+    selectedFileRecord
+  ) => ({
+    fileRecords,
+    jobs,
+    setSelectedFileRecord,
+    removeFileRecord,
     selectedFileRecord,
   })
 )
 
 export const FileList = ({
   fileRecords,
-  onSelectedFileRecordChange,
+  jobs,
+  setSelectedFileRecord,
+  removeFileRecord,
   selectedFileRecord,
 }: FileListProps): JSX.Element => {
   const itemData = createItemData(
     fileRecords,
-    onSelectedFileRecordChange,
+    jobs,
+    setSelectedFileRecord,
+    removeFileRecord,
     selectedFileRecord
   )
   return (
     <List
-      height={300}
-      itemCount={fileRecords.length}
+      height={450}
+      itemCount={jobs.length + fileRecords.length}
       itemSize={100}
       width="100%"
       itemData={itemData}
     >
-      {FileRow}
+      {Row}
     </List>
   )
 }

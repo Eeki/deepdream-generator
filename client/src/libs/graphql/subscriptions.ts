@@ -1,4 +1,4 @@
-export const onCreateJob = `
+export const onCreateJobSubscription = `
   subscription OnCreateJob($user_id: String!) {
     onCreateJob(user_id: $user_id) {
       id
@@ -12,7 +12,7 @@ export const onCreateJob = `
   }
 `
 
-export const onUpdateJob = `
+export const onUpdateJobSubscription = `
   subscription OnUpdateJob($user_id: String!) {
     onUpdateJob(user_id: $user_id) {
       id
@@ -26,13 +26,14 @@ export const onUpdateJob = `
   }
 `
 
-export const onCreateFile = `
+export const onCreateFileSubscription = `
   subscription OnCreateFile($user_id: String!) {
     onCreateFile(user_id: $user_id) {
     user_id
     file_name
     file_path
-    created_at     
+    created_at
+    type
     }
   }
 `

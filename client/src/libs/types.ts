@@ -1,8 +1,14 @@
+export enum FileRecordType {
+  UPLOAD = 'UPLOAD',
+  RESULT = 'RESULT',
+}
+
 export interface FileRecord {
   file_path: string
   file_name: string
   created_at?: number
   mime_type?: string
+  type?: FileRecordType
 }
 
 export interface Job {
@@ -45,9 +51,6 @@ export interface AmplifyConfigs {
     bucket: string
     region: string
     identityPoolId: string
-  }
-  API: {
-    endpoints: ApiEndpoint[]
   }
   // Appsync configs
   aws_appsync_graphqlEndpoint: string

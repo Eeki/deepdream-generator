@@ -6,6 +6,7 @@ export const ListUserFileRecords = `
         file_path
         file_name
         created_at
+        type
       }
     }
   }

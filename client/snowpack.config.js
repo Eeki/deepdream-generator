@@ -18,13 +18,4 @@ module.exports = {
   optimize: {
     bundle: true,
   },
-  packageOptions: {
-    /* ... */
-  },
-  devOptions: {
-    /* ... */
-  },
-  buildOptions: {
-    /* ... */
-  },
 }

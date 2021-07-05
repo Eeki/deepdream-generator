@@ -8,3 +8,6 @@ Pillow
 deepdiff
 requests_aws4auth
 gql
+scipy
+matplotlib
+numpy

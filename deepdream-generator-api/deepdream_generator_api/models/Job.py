@@ -23,6 +23,7 @@ class Job(BaseModel):
     input_path_index = InputPathIndex()
     input_path = UnicodeAttribute()
     input_name = UnicodeAttribute()
+    params = UnicodeAttribute()
     result_path = UnicodeAttribute(null=True)
     progress = NumberAttribute(default=0)
     started_at = NumberAttribute(null=True)
