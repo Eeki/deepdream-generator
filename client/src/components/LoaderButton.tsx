@@ -5,9 +5,8 @@ export function LoaderButton({
   isLoading,
   disabled = false,
   loadingText,
-  className = '',
   ...props
-}: ButtonProps) {
+}: ButtonProps): JSX.Element {
   return (
     <Button
       isLoading={isLoading}

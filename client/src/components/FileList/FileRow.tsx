@@ -1,15 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Flex, Image, Spacer, Text } from '@chakra-ui/react'
 
-import { ImagePreview } from '@components/ImagePreview'
 import { useS3PrivateLink } from '@libs/hooks/s3'
 import type { FileRecord } from '@libs/types'
 
 interface FileRowProps {
   fileRecord: FileRecord
-
   setSelectedFileRecord: (fileRecord: FileRecord) => void
-  removeFileRecord: (filePath: string) => Promise<boolean>
+  setFileRecordPreview: (fileRecord: FileRecord) => void
   selectedFileRecord?: FileRecord
   style: any
 }
@@ -20,11 +18,10 @@ interface FileRowProps {
 export const FileRow = ({
   fileRecord,
   setSelectedFileRecord,
-  removeFileRecord,
+  setFileRecordPreview,
   selectedFileRecord,
   style,
 }: FileRowProps): JSX.Element => {
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const fileUrl = useS3PrivateLink(fileRecord.file_path)
 
   return (
@@ -52,8 +49,12 @@ export const FileRow = ({
         </Flex>
         <Spacer />
         <Image
-          onClick={() => {
-            setIsPreviewOpen(true)
+          _hover={{
+            transform: 'scale(1.1)',
+          }}
+          onClick={event => {
+            event.stopPropagation()
+            setFileRecordPreview(fileRecord)
           }}
           width="33%"
           objectFit="cover"
@@ -61,14 +62,6 @@ export const FileRow = ({
           borderRadius="base"
         />
       </Flex>
-      {/* TODO have only one ImagePreview that is not a children
-          of a row but for the Image Browser */}
-      <ImagePreview
-        fileRecord={fileRecord}
-        isOpen={isPreviewOpen}
-        closePreview={() => setIsPreviewOpen(false)}
-        removeFileRecord={removeFileRecord}
-      />
     </div>
   )
 }

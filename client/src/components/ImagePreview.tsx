@@ -16,9 +16,8 @@ import { s3PrivateGet } from '@libs/awsS3Lib'
 
 interface PreviewProps {
   fileRecord: FileRecord
-  isOpen: boolean
   closePreview: () => void
-  removeFileRecord: (filePath: string) => Promise<boolean>
+  deleteFileRecord: (filePath: string) => Promise<boolean>
 }
 
 // TODO: The download don't work for all of the files and it is just opening the image as fullscreen.
@@ -26,9 +25,8 @@ interface PreviewProps {
 
 export const ImagePreview = ({
   fileRecord: { file_path, file_name },
-  isOpen,
   closePreview,
-  removeFileRecord,
+  deleteFileRecord,
 }: PreviewProps): JSX.Element => {
   const [isDeleteLoading, setIsDeleteLoading] = useState(false)
   const fileUrl = useS3PrivateLink(file_path)
@@ -45,14 +43,14 @@ export const ImagePreview = ({
 
   const deleteFileAndClose = useCallback(async () => {
     setIsDeleteLoading(true)
-    const success = await removeFileRecord(file_path)
+    const success = await deleteFileRecord(file_path)
     if (success) {
       closePreview()
     }
   }, [file_path])
 
   return (
-    <Modal isOpen={isOpen} onClose={closePreview} size="2xl">
+    <Modal isOpen={true} onClose={closePreview} size="2xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{file_name}</ModalHeader>

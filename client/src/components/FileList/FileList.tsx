@@ -8,7 +8,7 @@ interface FileListProps {
   fileRecords: FileRecord[]
   jobs: Job[]
   setSelectedFileRecord: (fileRecord: FileRecord) => void
-  removeFileRecord: (filePath: string) => Promise<boolean>
+  setFileRecordPreview: (fileRecord: FileRecord) => void
   selectedFileRecord?: FileRecord
 }
 
@@ -17,13 +17,13 @@ const createItemData = memoize(
     fileRecords,
     jobs,
     setSelectedFileRecord,
-    removeFileRecord,
+    setFileRecordPreview,
     selectedFileRecord
   ) => ({
     fileRecords,
     jobs,
     setSelectedFileRecord,
-    removeFileRecord,
+    setFileRecordPreview,
     selectedFileRecord,
   })
 )
@@ -32,14 +32,14 @@ export const FileList = ({
   fileRecords,
   jobs,
   setSelectedFileRecord,
-  removeFileRecord,
+  setFileRecordPreview,
   selectedFileRecord,
 }: FileListProps): JSX.Element => {
   const itemData = createItemData(
     fileRecords,
     jobs,
     setSelectedFileRecord,
-    removeFileRecord,
+    setFileRecordPreview,
     selectedFileRecord
   )
   return (

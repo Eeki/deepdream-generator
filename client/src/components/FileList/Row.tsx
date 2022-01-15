@@ -8,7 +8,7 @@ interface RowData {
   fileRecords: FileRecord[]
   jobs: Job[]
   setSelectedFileRecord: (fileRecord: FileRecord) => void
-  removeFileRecord: (filePath: string) => Promise<boolean>
+  setFileRecordPreview: (fileRecord: FileRecord) => void
   selectedFileRecord?: FileRecord
 }
 
@@ -17,13 +17,14 @@ interface FileRowProps extends ListChildComponentProps {
   index: number
   style: any
 }
+
 // TODO this needs some memoization
 export const Row = ({ data, index, style }: FileRowProps): JSX.Element => {
   const {
     fileRecords,
     jobs,
     setSelectedFileRecord,
-    removeFileRecord,
+    setFileRecordPreview,
     selectedFileRecord,
   } = data
   const type = index >= jobs.length ? 'FILE_RECORD' : 'JOB'
@@ -32,7 +33,7 @@ export const Row = ({ data, index, style }: FileRowProps): JSX.Element => {
       <FileRow
         fileRecord={fileRecords[index - jobs.length]}
         setSelectedFileRecord={setSelectedFileRecord}
-        removeFileRecord={removeFileRecord}
+        setFileRecordPreview={setFileRecordPreview}
         selectedFileRecord={selectedFileRecord}
         style={style}
       />

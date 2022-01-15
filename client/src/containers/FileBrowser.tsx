@@ -1,8 +1,10 @@
 import React, { useCallback } from 'react'
 import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
+
 import { FileUpload } from '@components/FileUpload'
 import { FileList } from '@components/FileList'
 import { Spinner } from '@components/Spinner'
+import { ImagePreview } from '@components/ImagePreview'
 import { useFileRecords } from '@libs/hooks/fileRecords'
 import { FileRecord, FileRecordType } from '@libs/types'
 import { useJobs } from '@libs/hooks/jobs'
@@ -27,7 +29,9 @@ export function FileBrowser({
   selectedFileRecord,
 }: FileBrowserProps): JSX.Element {
   const [tabIndex, setTabIndex] = React.useState(0)
-  // const [activeJobs, setActiveJobs] = React.useState<Job[]>([])
+  const [fileRecordPreview, setFileRecordPreview] = React.useState<
+    FileRecord | undefined
+  >()
   const {
     fileRecords,
     isLoading: areFileRecordsLoading,
@@ -54,61 +58,61 @@ export function FileBrowser({
     return jobs.filter(({ progress }) => progress < 1)
   }, [jobs, tabIndex])
 
-  const removeFileRecord = useCallback(
-    async (file_path: string): Promise<boolean> => {
-      const success = await deleteFileRecord(file_path)
-      if (!success) {
-        return false
-      }
-      if (selectedFileRecord?.file_path === file_path) {
-        setSelectedFileRecord(undefined)
-      }
-      return true
-    },
-    []
-  )
-
   return (
-    <Box
-      position="relative"
-      boxShadow="2xl"
-      direction="column"
-      w="md"
-      borderWidth="1.1px"
-      borderRadius="lg"
-      overflow="hidden"
-      padding="1rem"
-      marginLeft="2rem"
-      marginBottom="4rem"
-      height="700px"
-    >
-      {/* TODO add loading spinner when loading initial fileRecords */}
-      <Tabs
-        index={tabIndex}
-        onChange={index => setTabIndex(index)}
-        isFitted
-        marginBottom="1rem"
+    <>
+      <Box
+        position="relative"
+        boxShadow="2xl"
+        direction="column"
+        w="md"
+        borderWidth="1.1px"
+        borderRadius="lg"
+        overflow="hidden"
+        padding="1rem"
+        marginLeft="2rem"
+        marginBottom="4rem"
+        height="700px"
       >
-        <TabList>
-          {tabs.map(({ label, type }) => (
-            <Tab key={type}>{label}</Tab>
-          ))}
-        </TabList>
-      </Tabs>
-      {areFileRecordsLoading || areJobsLoading ? (
-        <Spinner />
-      ) : (
-        <FileList
-          fileRecords={getFileRecords()}
-          jobs={getJobs()}
-          setSelectedFileRecord={setSelectedFileRecord}
-          removeFileRecord={removeFileRecord}
-          selectedFileRecord={selectedFileRecord}
+        {/* TODO add loading spinner when loading initial fileRecords */}
+        <Tabs
+          index={tabIndex}
+          onChange={index => setTabIndex(index)}
+          isFitted
+          marginBottom="1rem"
+        >
+          <TabList>
+            {tabs.map(({ label, type }) => (
+              <Tab key={type}>{label}</Tab>
+            ))}
+          </TabList>
+        </Tabs>
+        {areFileRecordsLoading || areJobsLoading ? (
+          <Spinner />
+        ) : (
+          <FileList
+            fileRecords={getFileRecords()}
+            jobs={getJobs()}
+            setSelectedFileRecord={setSelectedFileRecord}
+            setFileRecordPreview={setFileRecordPreview}
+            selectedFileRecord={selectedFileRecord}
+          />
+        )}
+        <Box position="absolute" left={0} right={0} bottom={0} padding="1rem">
+          <FileUpload>Click to Upload</FileUpload>
+        </Box>
+      </Box>
+      {fileRecordPreview && (
+        <ImagePreview
+          fileRecord={fileRecordPreview}
+          closePreview={() => setFileRecordPreview(undefined)}
+          deleteFileRecord={filePath => {
+            if (filePath === selectedFileRecord?.file_path) {
+              setSelectedFileRecord(undefined)
+            }
+            return deleteFileRecord(filePath)
+          }}
         />
       )}
-      <Box position="absolute" left={0} right={0} bottom={0} padding="1rem">
-        <FileUpload>Click to Upload</FileUpload>
-      </Box>
-    </Box>
+    </>
   )
 }
