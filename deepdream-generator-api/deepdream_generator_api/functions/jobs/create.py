@@ -25,6 +25,7 @@ def main(event, _):
         'input_name': data['input_name'],
     }
 
+    # Creating a new job to DynamoDB using appsync grahpql
     response = appsync_client.execute(
         create_job,
         variable_values=json.dumps({'input': graphql_params})
@@ -32,6 +33,7 @@ def main(event, _):
 
     job = response['createJob']
 
+    # Adding a new message to sqs job queue
     job_queue.send_message(
         MessageBody=json.dumps({
             'user_id': cognito_user,

@@ -45,13 +45,15 @@ type FileConnection {
 }
 
 type Mutation {
+    # User authentication
     createOwnFile(input: CreateFileInput!): File
     @aws_cognito_user_pools
     deleteOwnFile(file_path: String!): File
     @aws_cognito_user_pools
+
+    # AWS IAM authentication
     createFile(input: CreateFileInput!): File
     @aws_iam
-
     createJob(input: CreateJobInput!): Job
     @aws_iam
     updateJob(input: UpdateJobInput!): Job
@@ -59,14 +61,15 @@ type Mutation {
 }
 
 type Query {
+    # User authentication
     listUserFiles(filter: FileFilterInput, limit: Int, nextToken: String): FileConnection
     @aws_cognito_user_pools
     listUserJobs(filter: JobFilterInput, limit: Int, nextToken: String): JobConnection
     @aws_cognito_user_pools
+
+    # AWS IAM authentication
     getJob(user_id: String!, id: String!): Job
     @aws_iam
-    # TODO add queryJobsByInputPathIndex if needed
-    # queryJobsByInputPathIndex(user_id: String!, first: Int, after: String): JobConnection @aws_cognito_user_pools
 }
 
 type Subscription {

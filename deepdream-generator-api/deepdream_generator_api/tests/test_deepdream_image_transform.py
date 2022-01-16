@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 from deepdream_generator_api.libs.aws_resources import get_resource, get_users_private_file_path
+from deepdream_generator_api.libs.data.deepdream import DeepdreamParams
 from deepdream_generator_api.tests.fixtures.s3 import S3FileUploadItem
 from deepdream_generator_api.models.Job import Job
 from deepdream_generator_api.libs import appsync
@@ -63,7 +64,8 @@ class TestDeepdreamImageTransform(object):
             id=job_id,
             user_id=user_id,
             input_path=s3_file_path,
-            input_name=s3_file_name
+            input_name=s3_file_name,
+            params=json.dumps(DeepdreamParams(num_iterations=2).as_dict())
         )
 
         job.save()
@@ -105,14 +107,14 @@ class TestDeepdreamImageTransform(object):
         # Monkey patch uuid package so that function uuid.uuid4() will return always the same uuid
         monkeypatch.setattr(uuid, 'uuid4', patch_uuid)
 
-        # Monkey path time package so that function time.time() will return always the same timestamp
+        # Monkey patch time package so that function time.time() will return always the same timestamp
         monkeypatch.setattr(time, 'time', patch_time)
 
         # Monkey patch appsync client because appsync is not included in the free localstack
         appsync_client = GqlMockClient(responses=gql_responses)
         monkeypatch.setattr(appsync, 'make_appsync_client', lambda: appsync_client)
 
-        # This is little hackish but the lambda handler need to be imported only after the monkeypatch
+        # The lambda handler need to be imported after the monkey-patching is finished
         from deepdream_generator_api.functions.deepdream import deepdream_image_transform
 
         # When calling lambda with sqs message event

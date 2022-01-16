@@ -67,7 +67,6 @@ export const FileUpload = ({
           amplifyConfigs?.Storage?.bucket
         )
         await createFileRecord(uploadResult)
-        // TODO add down load indicator to the file list like it is here https://codesandbox.io/s/4tv8g
       } catch (error) {
         onError(error)
       } finally {
