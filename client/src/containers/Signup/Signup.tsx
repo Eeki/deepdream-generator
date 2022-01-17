@@ -1,23 +1,19 @@
 import React, { FormEvent, useState } from 'react'
-import Auth from '@aws-amplify/auth'
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Input,
-  Stack,
-} from '@chakra-ui/react'
 import { useHistory } from 'react-router-dom'
-import { LoaderButton } from '@components/LoaderButton'
+import Auth from '@aws-amplify/auth'
+import { Stack, Avatar, Heading, Flex, Box } from '@chakra-ui/react'
+
+import { Card } from '@components/Card'
 import { useAppContext } from '@libs/contextLib'
 import { useFormFields } from '@libs/hooks/form'
 import { onError } from '@libs/errorLib'
-import './Signup.css'
+import { SignupForm } from './SignupForm'
 
 import type { ISignUpResult } from 'amazon-cognito-identity-js'
+import { ConfirmationForm } from '@containers/Signup/ConfirmationForm'
+import { headerHeight } from '@libs/const'
 
-// TODO Test that the sign up really works
-export function Signup() {
+export function Signup(): JSX.Element {
   const [fields, handleFieldChange] = useFormFields({
     email: '',
     password: '',
@@ -76,83 +72,49 @@ export function Signup() {
     }
   }
 
-  // TODO split this as own component
-  function renderConfirmationForm() {
-    return (
-      <form onSubmit={handleConfirmationSubmit}>
-        <Stack spacing={4}>
-          <FormControl id="confirmationCode">
-            <FormLabel>Confirmation Code</FormLabel>
-            <Input
-              autoFocus
-              type="tel"
-              value={fields.confirmationCode}
-              onChange={handleFieldChange}
-            />
-            <FormHelperText>
-              Please check your email for the code.
-            </FormHelperText>
-          </FormControl>
-          <LoaderButton
-            type="submit"
-            isLoading={isLoading}
-            disabled={!validateConfirmationForm()}
-          >
-            Verify
-          </LoaderButton>
-        </Stack>
-      </form>
-    )
-  }
-
-  // TODO split this as own component
-  function renderForm() {
-    return (
-      <form onSubmit={handleSubmit}>
-        <Stack spacing={3}>
-          <FormControl id="email">
-            <FormLabel>Email</FormLabel>
-            <Input
-              autoFocus
-              type="email"
-              value={fields.email}
-              onChange={handleFieldChange}
-            />
-          </FormControl>
-
-          <FormControl id="password">
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              value={fields.password}
-              onChange={handleFieldChange}
-            />
-          </FormControl>
-
-          <FormControl id="confirmPassword">
-            <FormLabel>Confirm Password</FormLabel>
-            <Input
-              type="password"
-              value={fields.confirmPassword}
-              onChange={handleFieldChange}
-            />
-          </FormControl>
-
-          <LoaderButton
-            type="submit"
-            isLoading={isLoading}
-            disabled={!validateForm()}
-          >
-            Signup
-          </LoaderButton>
-        </Stack>
-      </form>
-    )
-  }
-
   return (
-    <div className="Signup">
-      {newUser === null ? renderForm() : renderConfirmationForm()}
-    </div>
+    <Flex
+      flexDirection="column"
+      width="100vw"
+      height={`calc(100vh - ${headerHeight}px)`}
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Stack
+        flexDir="column"
+        mb="2"
+        justifyContent="center"
+        alignItems="center"
+        minW="100%"
+      >
+        <Avatar bg="teal.500" />
+        <Heading paddingBottom="1rem" color="teal.400">
+          Signup
+        </Heading>
+        <Card width="100%" maxW="468px" justifyContent="center">
+          <Box width="100%">
+            {newUser === null ? (
+              <SignupForm
+                onSubmit={handleSubmit}
+                onFieldChange={handleFieldChange}
+                email={fields.email}
+                password={fields.password}
+                confirmPassword={fields.confirmPassword}
+                isLoading={isLoading}
+                isValid={validateForm()}
+              />
+            ) : (
+              <ConfirmationForm
+                onFieldChange={handleFieldChange}
+                handleConfirmationSubmit={handleConfirmationSubmit}
+                confirmationCode={fields.confirmationCode}
+                isLoading={isLoading}
+                isValid={validateConfirmationForm()}
+              />
+            )}
+          </Box>
+        </Card>
+      </Stack>
+    </Flex>
   )
 }

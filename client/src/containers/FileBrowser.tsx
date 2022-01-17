@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react'
-import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { Flex, Tab, TabList, Tabs } from '@chakra-ui/react'
 
 import { FileUpload } from '@components/FileUpload'
 import { FileList } from '@components/FileList'
-import { Spinner } from '@components/Spinner'
 import { ImagePreview } from '@components/ImagePreview'
+import { Card } from '@components/Card'
 import { useFileRecords } from '@libs/hooks/fileRecords'
 import { FileRecord, FileRecordType } from '@libs/types'
 import { useJobs } from '@libs/hooks/jobs'
@@ -16,7 +16,7 @@ interface FileBrowserProps {
 
 const tabs = [
   { label: 'All', type: 'all' },
-  { label: 'Uploaded files', type: 'uploaded' },
+  { label: 'Uploaded', type: 'uploaded' },
   { label: 'Results', type: 'result' },
 ]
 
@@ -59,21 +59,16 @@ export function FileBrowser({
   }, [jobs, tabIndex])
 
   return (
-    <>
-      <Box
-        position="relative"
-        boxShadow="2xl"
+    <Card height="100%">
+      <Flex
         direction="column"
-        w="md"
-        borderWidth="1.1px"
-        borderRadius="lg"
+        maxWidth="md"
+        width="100vw"
         overflow="hidden"
         padding="1rem"
-        marginLeft="2rem"
-        marginBottom="4rem"
-        height="700px"
+        height="100%"
+        justifyContent="space-between"
       >
-        {/* TODO add loading spinner when loading initial fileRecords */}
         <Tabs
           index={tabIndex}
           onChange={index => setTabIndex(index)}
@@ -86,21 +81,18 @@ export function FileBrowser({
             ))}
           </TabList>
         </Tabs>
-        {areFileRecordsLoading || areJobsLoading ? (
-          <Spinner />
-        ) : (
-          <FileList
-            fileRecords={getFileRecords()}
-            jobs={getJobs()}
-            setSelectedFileRecord={setSelectedFileRecord}
-            setFileRecordPreview={setFileRecordPreview}
-            selectedFileRecord={selectedFileRecord}
-          />
-        )}
-        <Box position="absolute" left={0} right={0} bottom={0} padding="1rem">
-          <FileUpload>Click to Upload</FileUpload>
-        </Box>
-      </Box>
+
+        <FileList
+          fileRecords={getFileRecords()}
+          jobs={getJobs()}
+          setSelectedFileRecord={setSelectedFileRecord}
+          setFileRecordPreview={setFileRecordPreview}
+          isLoading={areFileRecordsLoading || areJobsLoading}
+          selectedFileRecord={selectedFileRecord}
+        />
+
+        <FileUpload>Click to Upload</FileUpload>
+      </Flex>
       {fileRecordPreview && (
         <ImagePreview
           fileRecord={fileRecordPreview}
@@ -113,6 +105,6 @@ export function FileBrowser({
           }}
         />
       )}
-    </>
+    </Card>
   )
 }

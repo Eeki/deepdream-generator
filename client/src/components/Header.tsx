@@ -1,13 +1,17 @@
 import React from 'react'
 import { Link as RouteLink } from 'react-router-dom'
 import { Heading, Flex, Wrap, WrapItem, Link } from '@chakra-ui/react'
+import { headerHeight } from '@libs/const'
 
 interface HeaderProps {
   isAuthenticated: boolean
   handleLogout: () => void
 }
 
-const Header = ({ isAuthenticated, handleLogout }: HeaderProps) => (
+const Header = ({
+  isAuthenticated,
+  handleLogout,
+}: HeaderProps): JSX.Element => (
   <Flex
     as="nav"
     align="center"
@@ -16,6 +20,8 @@ const Header = ({ isAuthenticated, handleLogout }: HeaderProps) => (
     padding="1.5rem"
     bg="teal.500"
     color="white"
+    width="100vw"
+    height={headerHeight}
   >
     <Flex align="center" mr={5}>
       <RouteLink to="/">

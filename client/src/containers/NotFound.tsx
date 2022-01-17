@@ -1,15 +1,14 @@
 import React from 'react'
-import { Center, Heading } from '@chakra-ui/react'
-import './NotFound.css'
+import { Center, Heading, Flex } from '@chakra-ui/react'
 
 export function NotFound(): JSX.Element {
   return (
-    <div className="NotFound">
+    <Flex height="100%" flexDir="column" justifyContent="center">
       <Center>
         <Heading as="h3" size="lg">
           Sorry, page not found!
         </Heading>
       </Center>
-    </div>
+    </Flex>
   )
 }

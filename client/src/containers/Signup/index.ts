@@ -1,3 +1,1 @@
-import { Signup } from './Signup'
-
-export { Signup }
+export * from './Signup'

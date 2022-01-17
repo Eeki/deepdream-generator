@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import Auth from '@aws-amplify/auth'
-import { Center } from '@chakra-ui/react'
+import { Center, Box } from '@chakra-ui/react'
 import { AppContext } from '@libs/contextLib'
 import { onError } from '@libs/errorLib'
 import { Header } from '@components/Header'
 import { Spinner } from '@components/Spinner'
 import { Routes } from '../../Routes'
-import './App.css'
 import type { UserInfo, AmplifyConfigs } from '@libs/types'
 
 interface AppProps {
@@ -47,7 +46,7 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
   }
 
   return (
-    <div className="App">
+    <Box height="100vh" width="100vw">
       <AppContext.Provider
         value={{ isAuthenticated, userHasAuthenticated, user, amplifyConfigs }}
       >
@@ -60,7 +59,7 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
           <Routes />
         )}
       </AppContext.Provider>
-    </div>
+    </Box>
   )
 }
 

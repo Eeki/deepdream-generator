@@ -79,7 +79,7 @@ export const FileUpload = ({
   )
 
   return (
-    <FormControl isRequired>
+    <FormControl isRequired marginTop="2rem">
       <InputGroup>
         <input
           type="file"

@@ -31,8 +31,7 @@ export const SelectParameters = ({
   params,
   handleChange,
 }: SelectParametersProps): JSX.Element => (
-  <Stack spacing={3}>
-    <Text fontSize="xl">Parameters</Text>
+  <Stack spacing={3} overflow="auto">
     <Container>
       <Box mb={4} mt={4}>
         <FormLabel>Tensor layer</FormLabel>

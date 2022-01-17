@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from 'react'
-import { Text, Center, Wrap, WrapItem } from '@chakra-ui/react'
+import { Box, useMediaQuery } from '@chakra-ui/react'
 
-import { FileBrowser } from '@containers/FileBrowser'
-import { GenerateDeepdream } from '@containers/GenerateDeepdream'
+import { DesktopLayout } from './DesktopLayout'
+import { MobileLayout } from './MobileLayout'
 import type { FileRecord } from '@libs/types'
-import './Home.css'
+import { largeScreenWidth } from '@libs/const'
 
 export function Home(): JSX.Element {
   const [selectedFileRecord, setSelectedFileRecord] = useState<FileRecord>()
+  const [isLargeScreen] = useMediaQuery(`(min-width: ${largeScreenWidth}px)`)
 
   const handleSelectedFileRecordChange = useCallback(
     (fileRecord?: FileRecord) => {
@@ -22,21 +23,18 @@ export function Home(): JSX.Element {
   )
 
   return (
-    <div className="Home">
-      <Text color="gray.500">Generate dreepdreams from photos and videos</Text>
-      <Center height="100%" width="100%" marginTop="3rem">
-        <Wrap>
-          <WrapItem>
-            <FileBrowser
-              selectedFileRecord={selectedFileRecord}
-              setSelectedFileRecord={handleSelectedFileRecordChange}
-            />
-          </WrapItem>
-          <WrapItem>
-            <GenerateDeepdream fileRecord={selectedFileRecord} />
-          </WrapItem>
-        </Wrap>
-      </Center>
-    </div>
+    <Box>
+      {isLargeScreen ? (
+        <DesktopLayout
+          onSelectedFileRecordChange={handleSelectedFileRecordChange}
+          selectedFileRecord={selectedFileRecord}
+        />
+      ) : (
+        <MobileLayout
+          setSelectedFileRecord={handleSelectedFileRecordChange}
+          selectedFileRecord={selectedFileRecord}
+        />
+      )}
+    </Box>
   )
 }
