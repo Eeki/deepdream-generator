@@ -2,14 +2,15 @@ import { useCallback, useEffect, useState } from 'react'
 import get from 'lodash/get'
 import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql'
 
-import { ListUserJobs } from '@libs/graphql/queries'
+import { ListUserJobs } from '../graphql/queries'
 import {
   onCreateJobSubscription,
   onUpdateJobSubscription,
-} from '@libs/graphql/subscriptions'
-import { useAppContext } from '@libs/contextLib'
-import type { Job } from '@libs/types'
-import { ObservableGraphQLResult, subscribeGql } from '@libs/subscriptionLib'
+} from '../graphql/subscriptions'
+import { useAppContext } from '../contextLib'
+import { ObservableGraphQLResult, subscribeGql } from '../subscriptionLib'
+import type { Job } from '../types'
+import { onError } from '../errorLib'
 
 export interface JobsResult {
   jobs: Job[]
@@ -30,19 +31,28 @@ export function useJobs(): JobsResult {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    fetchJobs()
-    const onCreateJobSubscription = subscribeOnCreateJob()
-    const onUpdateJobSubscription = subscribeOnUpdateJob()
-    return () => {
-      onCreateJobSubscription.unsubscribe()
-      onUpdateJobSubscription.unsubscribe()
+    if (user) {
+      fetchJobs()
+      const onCreateJobSubscription = subscribeOnCreateJob()
+      const onUpdateJobSubscription = subscribeOnUpdateJob()
+      return () => {
+        onCreateJobSubscription.unsubscribe()
+        onUpdateJobSubscription.unsubscribe()
+      }
     }
-  }, [])
+  }, [user])
 
   const fetchJobs = useCallback(async () => {
-    const response = await GraphQLAPI.graphql(graphqlOperation(ListUserJobs))
-    const jobs = get(response, 'data.listUserJobs.items', [])
-    setJobs(jobs)
+    setIsLoading(true)
+    try {
+      const response = await GraphQLAPI.graphql(graphqlOperation(ListUserJobs))
+      const jobs = get(response, 'data.listUserJobs.items', [])
+      setJobs(jobs)
+    } catch (e: any) {
+      onError(e)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   const subscribeOnCreateJob = useCallback(() => {

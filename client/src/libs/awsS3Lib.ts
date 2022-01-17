@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import Storage from '@aws-amplify/storage'
-import type { UserInfo } from '@libs/types'
+import type { UserInfo } from './types'
 
 export interface UploadResult {
   file_path: string
@@ -10,10 +10,6 @@ export interface UploadResult {
 interface s3VaultCacheItem {
   timeStamp: Date
   url: string
-}
-
-interface StorageGetResponse {
-  Body: Blob | string
 }
 
 const s3Cache: Record<string, s3VaultCacheItem> = {}
@@ -55,14 +51,14 @@ export async function s3PrivateGet(filePath: string): Promise<string> {
     }
   }
 
-  const result = (await Storage.get(filePath, {
+  const result = await Storage.get(filePath, {
     expires: 900,
     download: true,
     customPrefix: {
       public: '',
     },
-  })) as StorageGetResponse
-  const url = URL.createObjectURL(result.Body)
+  })
+  const url = URL.createObjectURL(result.Body as Blob)
   s3Cache[filePath] = { timeStamp: new Date(), url }
   return url
 }

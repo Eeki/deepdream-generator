@@ -6,8 +6,9 @@ import {
   Input,
   Stack,
 } from '@chakra-ui/react'
-import { LoaderButton } from '@components/LoaderButton'
-import type { HTMLInputChangeEvent } from '@libs/hooks/form'
+
+import { LoaderButton } from '../../components/LoaderButton'
+import type { HTMLInputChangeEvent } from '../../libs/hooks/form'
 
 interface ConfirmationFormProps {
   onFieldChange: (event: HTMLInputChangeEvent) => void

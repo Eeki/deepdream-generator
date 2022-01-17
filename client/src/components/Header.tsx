@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link as RouteLink } from 'react-router-dom'
 import { Heading, Flex, Wrap, WrapItem, Link } from '@chakra-ui/react'
-import { headerHeight } from '@libs/const'
+import { headerHeight } from '../libs/const'
 
 interface HeaderProps {
   isAuthenticated: boolean

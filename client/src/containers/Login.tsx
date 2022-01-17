@@ -14,12 +14,13 @@ import {
   Heading,
   Box,
 } from '@chakra-ui/react'
-import { LoaderButton } from '@components/LoaderButton'
-import { Card } from '@components/Card'
-import { useAppContext } from '@libs/contextLib'
-import { onError } from '@libs/errorLib'
-import { useFormFields } from '@libs/hooks/form'
-import { headerHeight } from '@libs/const'
+
+import { LoaderButton } from '../components/LoaderButton'
+import { Card } from '../components/Card'
+import { useAppContext } from '../libs/contextLib'
+import { onError } from '../libs/errorLib'
+import { useFormFields } from '../libs/hooks/form'
+import { headerHeight } from '../libs/const'
 
 export function Login(): JSX.Element {
   const history = useHistory()
@@ -39,7 +40,7 @@ export function Login(): JSX.Element {
       await Auth.signIn(fields.email, fields.password)
       userHasAuthenticated(true)
       history.push('/')
-    } catch (e) {
+    } catch (e: any) {
       onError(e)
       setIsLoading(false)
     }

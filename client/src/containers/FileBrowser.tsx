@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react'
 import { Flex, Tab, TabList, Tabs } from '@chakra-ui/react'
 
-import { FileUpload } from '@components/FileUpload'
-import { FileList } from '@components/FileList'
-import { ImagePreview } from '@components/ImagePreview'
-import { Card } from '@components/Card'
-import { useFileRecords } from '@libs/hooks/fileRecords'
-import { FileRecord, FileRecordType } from '@libs/types'
-import { useJobs } from '@libs/hooks/jobs'
+import { FileUpload } from '../components/FileUpload'
+import { FileList } from '../components/FileList'
+import { ImagePreview } from '../components/ImagePreview'
+import { Card } from '../components/Card'
+import { useFileRecords } from '../libs/hooks/fileRecords'
+import { useJobs } from '../libs/hooks/jobs'
+import { FileRecord, FileRecordType } from '../libs/types'
 
 interface FileBrowserProps {
   setSelectedFileRecord: (fileRecord?: FileRecord) => void
@@ -58,6 +58,9 @@ export function FileBrowser({
     return jobs.filter(({ progress }) => progress < 1)
   }, [jobs, tabIndex])
 
+  const filteredFileRecords = getFileRecords()
+  const filteredJobs = getJobs()
+
   return (
     <Card height="100%">
       <Flex
@@ -83,8 +86,8 @@ export function FileBrowser({
         </Tabs>
 
         <FileList
-          fileRecords={getFileRecords()}
-          jobs={getJobs()}
+          fileRecords={filteredFileRecords}
+          jobs={filteredJobs}
           setSelectedFileRecord={setSelectedFileRecord}
           setFileRecordPreview={setFileRecordPreview}
           isLoading={areFileRecordsLoading || areJobsLoading}

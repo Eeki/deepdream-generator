@@ -3,8 +3,8 @@ import { Box, useMediaQuery } from '@chakra-ui/react'
 
 import { DesktopLayout } from './DesktopLayout'
 import { MobileLayout } from './MobileLayout'
-import type { FileRecord } from '@libs/types'
-import { largeScreenWidth } from '@libs/const'
+import type { FileRecord } from '../../libs/types'
+import { largeScreenWidth } from '../../libs/const'
 
 export function Home(): JSX.Element {
   const [selectedFileRecord, setSelectedFileRecord] = useState<FileRecord>()

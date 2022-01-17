@@ -3,15 +3,14 @@ import { useHistory } from 'react-router-dom'
 import Auth from '@aws-amplify/auth'
 import { Stack, Avatar, Heading, Flex, Box } from '@chakra-ui/react'
 
-import { Card } from '@components/Card'
-import { useAppContext } from '@libs/contextLib'
-import { useFormFields } from '@libs/hooks/form'
-import { onError } from '@libs/errorLib'
+import { Card } from '../../components/Card'
+import { useAppContext } from '../../libs/contextLib'
+import { useFormFields } from '../../libs/hooks/form'
+import { onError } from '../../libs/errorLib'
 import { SignupForm } from './SignupForm'
-
+import { headerHeight } from '../../libs/const'
+import { ConfirmationForm } from './ConfirmationForm'
 import type { ISignUpResult } from 'amazon-cognito-identity-js'
-import { ConfirmationForm } from '@containers/Signup/ConfirmationForm'
-import { headerHeight } from '@libs/const'
 
 export function Signup(): JSX.Element {
   const [fields, handleFieldChange] = useFormFields({
@@ -49,7 +48,7 @@ export function Signup(): JSX.Element {
       })
       setIsLoading(false)
       setNewUser(newUser)
-    } catch (e) {
+    } catch (e: any) {
       onError(e)
       setIsLoading(false)
     }
@@ -66,7 +65,7 @@ export function Signup(): JSX.Element {
 
       userHasAuthenticated(true)
       history.push('/')
-    } catch (e) {
+    } catch (e: any) {
       onError(e)
       setIsLoading(false)
     }

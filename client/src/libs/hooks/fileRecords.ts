@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { FileRecord } from '@libs/types'
+import type { FileRecord } from '../types'
 import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql'
-import { onCreateFileSubscription } from '@libs/graphql/subscriptions'
-import { ListUserFileRecords } from '@libs/graphql/queries'
 import get from 'lodash/get'
 import orderBy from 'lodash/orderBy'
-import { onError } from '@libs/errorLib'
-import { subscribeGql, ObservableGraphQLResult } from '@libs/subscriptionLib'
-import { useAppContext } from '@libs/contextLib'
-import { DeleteOwnFileRecord } from '@libs/graphql/mutations'
+
+import { onCreateFileSubscription } from '../graphql/subscriptions'
+import { ListUserFileRecords } from '../graphql/queries'
+import { onError } from '../errorLib'
+import { subscribeGql, ObservableGraphQLResult } from '../subscriptionLib'
+import { useAppContext } from '../contextLib'
+import { DeleteOwnFileRecord } from '../graphql/mutations'
 
 export interface UseFileRecordsResult {
   fileRecords: FileRecord[]
@@ -26,10 +27,12 @@ export function useFileRecords(): UseFileRecordsResult {
   const { user } = useAppContext()
 
   useEffect(() => {
-    fetchFileRecords()
-    const onCreateFileRecordSubscription = subscribeOnCreateFile()
-    return () => onCreateFileRecordSubscription.unsubscribe()
-  }, [])
+    if (user) {
+      fetchFileRecords()
+      const onCreateFileRecordSubscription = subscribeOnCreateFile()
+      return () => onCreateFileRecordSubscription.unsubscribe()
+    }
+  }, [user])
 
   const fetchFileRecords = useCallback(async () => {
     setIsLoading(true)
@@ -40,8 +43,8 @@ export function useFileRecords(): UseFileRecordsResult {
       const fileRecords = get(response, 'data.listUserFiles.items', [])
       const sortedFileRecords = orderBy(fileRecords, ['created_at'], ['desc'])
       setFileRecords(sortedFileRecords)
-    } catch (error) {
-      onError(error.message)
+    } catch (error: any) {
+      onError(error)
     } finally {
       setIsLoading(false)
     }
@@ -72,7 +75,7 @@ export function useFileRecords(): UseFileRecordsResult {
           fileRecords.filter(fileRecord => fileRecord.file_path !== file_path)
         )
         return true
-      } catch (error) {
+      } catch (error: any) {
         onError(error)
         return false
       }

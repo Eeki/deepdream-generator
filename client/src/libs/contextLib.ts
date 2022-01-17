@@ -1,5 +1,5 @@
 import { useContext, createContext } from 'react'
-import type { UserInfo, AmplifyConfigs } from '@libs/types'
+import type { UserInfo, AmplifyConfigs } from './types'
 
 interface AppContext {
   isAuthenticated: boolean

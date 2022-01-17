@@ -1,13 +1,7 @@
 import React from 'react'
-import {
-  Container,
-  FormLabel,
-  Select,
-  Stack,
-  Text,
-  Box,
-} from '@chakra-ui/react'
-import { Slider } from '@containers/GenerateDeepdream/Slider'
+import { Container, FormLabel, Select, Stack, Box } from '@chakra-ui/react'
+
+import { Slider } from './Slider'
 import type { paramName } from './const'
 
 interface SelectParametersProps {

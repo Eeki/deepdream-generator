@@ -1,8 +1,8 @@
 import React, { FormEvent } from 'react'
 import { FormControl, FormLabel, Input, Stack } from '@chakra-ui/react'
 
-import { LoaderButton } from '@components/LoaderButton'
-import type { HTMLInputChangeEvent } from '@libs/hooks/form'
+import { LoaderButton } from '../../components/LoaderButton'
+import type { HTMLInputChangeEvent } from '../../libs/hooks/form'
 
 interface SignupFormProps {
   onFieldChange: (event: HTMLInputChangeEvent) => void

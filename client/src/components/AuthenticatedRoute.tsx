@@ -1,6 +1,6 @@
 import React from 'react'
 import { Route, Redirect, useLocation } from 'react-router-dom'
-import { useAppContext } from '@libs/contextLib'
+import { useAppContext } from '../libs/contextLib'
 
 interface AuthenticatedRouteProps {
   children: JSX.Element

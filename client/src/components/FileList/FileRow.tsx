@@ -1,8 +1,8 @@
 import React from 'react'
 import { Flex, Image, Spacer, Text } from '@chakra-ui/react'
 
-import { useS3PrivateLink } from '@libs/hooks/s3'
-import type { FileRecord } from '@libs/types'
+import { useS3PrivateLink } from '../../libs/hooks/s3'
+import type { FileRecord } from '../../libs/types'
 
 interface FileRowProps {
   fileRecord: FileRecord

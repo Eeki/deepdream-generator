@@ -5,8 +5,8 @@ import { SizeMe } from 'react-sizeme'
 import { Center } from '@chakra-ui/react'
 
 import { Row } from './Row'
-import type { FileRecord, Job } from '@libs/types'
-import { Spinner } from '@components/Spinner'
+import type { FileRecord, Job } from '../../libs/types'
+import { Spinner } from '../Spinner'
 
 interface FileListProps {
   fileRecords: FileRecord[]

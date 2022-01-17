@@ -10,9 +10,10 @@ import {
   Button,
   Image,
 } from '@chakra-ui/react'
-import { useS3PrivateLink } from '@libs/hooks/s3'
-import type { FileRecord } from '@libs/types'
-import { s3PrivateGet } from '@libs/awsS3Lib'
+
+import { useS3PrivateLink } from '../libs/hooks/s3'
+import type { FileRecord } from '../libs/types'
+import { s3PrivateGet } from '../libs/awsS3Lib'
 
 interface PreviewProps {
   fileRecord: FileRecord
@@ -50,9 +51,9 @@ export const ImagePreview = ({
   }, [file_path])
 
   return (
-    <Modal isOpen={true} onClose={closePreview} size="2xl">
+    <Modal isOpen={true} onClose={closePreview} size="xl">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent margin="1rem">
         <ModalHeader>{file_name}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>

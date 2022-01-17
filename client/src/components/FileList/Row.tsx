@@ -1,8 +1,9 @@
 import React from 'react'
 import type { ListChildComponentProps } from 'react-window'
+
 import { FileRow } from './FileRow'
 import { JobRow } from './JobRow'
-import type { FileRecord, Job } from '@libs/types'
+import type { FileRecord, Job } from '../../libs/types'
 
 interface RowData {
   fileRecords: FileRecord[]

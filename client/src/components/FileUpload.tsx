@@ -1,13 +1,14 @@
 import React, { ChangeEvent, useCallback, useRef, useState } from 'react'
+import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql'
 import { FormControl, InputGroup } from '@chakra-ui/react'
 import { DownloadIcon } from '@chakra-ui/icons'
-import { LoaderButton } from '@components/LoaderButton'
-import { s3PrivateUpload, UploadResult } from '@libs/awsS3Lib'
-import { onError } from '@libs/errorLib'
-import { useAppContext } from '@libs/contextLib'
-import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql'
-import { CreateOwnFileFileRecord } from '@libs/graphql/mutations'
-import { FileRecordType } from '@libs/types'
+
+import { LoaderButton } from './LoaderButton'
+import { s3PrivateUpload, UploadResult } from '../libs/awsS3Lib'
+import { onError } from '../libs/errorLib'
+import { useAppContext } from '../libs/contextLib'
+import { CreateOwnFileFileRecord } from '../libs/graphql/mutations'
+import { FileRecordType } from '../libs/types'
 
 interface FileUploadProps {
   acceptedFileTypes?: string[]
@@ -67,7 +68,7 @@ export const FileUpload = ({
           amplifyConfigs?.Storage?.bucket
         )
         await createFileRecord(uploadResult)
-      } catch (error) {
+      } catch (error: any) {
         onError(error)
       } finally {
         // Set the file input to empty so all files will trigger the onChange event

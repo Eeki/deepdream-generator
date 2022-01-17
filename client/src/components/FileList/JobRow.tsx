@@ -7,7 +7,7 @@ import {
   CircularProgressLabel,
 } from '@chakra-ui/react'
 import { formatDistance } from 'date-fns'
-import type { Job } from '@libs/types'
+import type { Job } from '../../libs/types'
 
 interface JobRowProps {
   job: Job

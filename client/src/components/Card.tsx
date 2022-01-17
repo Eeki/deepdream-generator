@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import { Flex, FlexProps, useMediaQuery } from '@chakra-ui/react'
-import { largeScreenWidth } from '@libs/const'
+
+import { largeScreenWidth } from '../libs/const'
 
 interface CardProps extends FlexProps {
   children: ReactNode

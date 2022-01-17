@@ -1,10 +1,10 @@
 import React from 'react'
 import { Box, Center } from '@chakra-ui/react'
 
-import { FileBrowser } from '@containers/FileBrowser'
-import { GenerateDeepdream } from '@containers/GenerateDeepdream'
-import { headerHeight } from '@libs/const'
-import type { FileRecord } from '@libs/types'
+import { FileBrowser } from '../FileBrowser'
+import { GenerateDeepdream } from '../GenerateDeepdream'
+import { headerHeight } from '../../libs/const'
+import type { FileRecord } from '../../libs/types'
 
 interface MobileLayoutProps {
   setSelectedFileRecord: (fileRecord?: FileRecord | undefined) => void

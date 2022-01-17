@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { s3PrivateGet } from '@libs/awsS3Lib'
+import { s3PrivateGet } from '../awsS3Lib'
 
 export function useS3PrivateLink(filePath: string): string {
   const [url, setUrl] = useState('')

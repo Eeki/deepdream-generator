@@ -2,12 +2,11 @@ import React, { useCallback, useState } from 'react'
 import API from '@aws-amplify/api'
 import { Button, Text, Flex, Center } from '@chakra-ui/react'
 
-import { onError } from '@libs/errorLib'
-import type { FileRecord } from '@libs/types'
-import { SelectParameters } from '@containers/GenerateDeepdream/SelectParameters'
-import { Card } from '@components/Card'
+import { onError } from '../../libs/errorLib'
+import type { FileRecord } from '../../libs/types'
+import { SelectParameters } from './SelectParameters'
+import { Card } from '../../components/Card'
 import { initParams, paramName } from './const'
-import { ArrowBackIcon } from '@chakra-ui/icons'
 
 interface GenerateDeepdreamProps {
   fileRecord?: FileRecord
