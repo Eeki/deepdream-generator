@@ -29,7 +29,12 @@ export const SelectParameters = ({
     <Container>
       <Box mb={4} mt={4}>
         <FormLabel>Tensor layer</FormLabel>
-        <Select value={params.layer_tensor_index}>
+        <Select
+          value={params.layer_tensor_index}
+          onChange={event =>
+            handleChange('layer_tensor_index')(Number(event.target.value))
+          }
+        >
           {tensorLayers.map((label, index) => (
             <option key={label} value={index}>
               {label}

@@ -26,7 +26,7 @@ export function Home(): JSX.Element {
     <Box>
       {isLargeScreen ? (
         <DesktopLayout
-          onSelectedFileRecordChange={handleSelectedFileRecordChange}
+          setSelectedFileRecord={handleSelectedFileRecordChange}
           selectedFileRecord={selectedFileRecord}
         />
       ) : (

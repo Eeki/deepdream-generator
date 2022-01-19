@@ -21,7 +21,8 @@ export function MobileLayout({
         {selectedFileRecord ? (
           <GenerateDeepdream
             fileRecord={selectedFileRecord}
-            onCancel={() => setSelectedFileRecord(undefined)}
+            setSelectedFileRecord={setSelectedFileRecord}
+            canCancel
           />
         ) : (
           <FileBrowser

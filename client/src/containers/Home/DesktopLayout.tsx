@@ -7,12 +7,12 @@ import { headerHeight } from '../../libs/const'
 import type { FileRecord } from '../../libs/types'
 
 interface DesktopLayoutProps {
-  onSelectedFileRecordChange: (fileRecord?: FileRecord | undefined) => void
+  setSelectedFileRecord: (fileRecord?: FileRecord | undefined) => void
   selectedFileRecord: FileRecord | undefined
 }
 
 export function DesktopLayout({
-  onSelectedFileRecordChange,
+  setSelectedFileRecord,
   selectedFileRecord,
 }: DesktopLayoutProps): JSX.Element {
   return (
@@ -26,10 +26,13 @@ export function DesktopLayout({
       >
         <FileBrowser
           selectedFileRecord={selectedFileRecord}
-          setSelectedFileRecord={onSelectedFileRecordChange}
+          setSelectedFileRecord={setSelectedFileRecord}
         />
         <Box width="2rem" /> {/* This is spacer between the components*/}
-        <GenerateDeepdream fileRecord={selectedFileRecord} />
+        <GenerateDeepdream
+          fileRecord={selectedFileRecord}
+          setSelectedFileRecord={setSelectedFileRecord}
+        />
       </Flex>
     </Center>
   )

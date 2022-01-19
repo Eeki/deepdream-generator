@@ -10,11 +10,13 @@ import { initParams, paramName } from './const'
 
 interface GenerateDeepdreamProps {
   fileRecord?: FileRecord
-  onCancel?: () => void
+  setSelectedFileRecord: (fileRecord?: FileRecord | undefined) => void
+  canCancel?: boolean
 }
 export const GenerateDeepdream = ({
   fileRecord,
-  onCancel,
+  setSelectedFileRecord,
+  canCancel = false,
 }: GenerateDeepdreamProps): JSX.Element => {
   const [params, setParams] = useState(initParams)
   const [isLoading, setIsLoading] = useState(false)
@@ -43,6 +45,7 @@ export const GenerateDeepdream = ({
         onError(error)
       } finally {
         setIsLoading(false)
+        setSelectedFileRecord(undefined)
       }
     }
   }, [fileRecord, params])
@@ -63,12 +66,12 @@ export const GenerateDeepdream = ({
           <>
             <SelectParameters params={params} handleChange={handleChange} />
             <Flex marginTop="1rem">
-              {typeof onCancel === 'function' && (
+              {canCancel && (
                 <Button
                   size="lg"
                   minH={12}
                   variant="ghost"
-                  onClick={onCancel}
+                  onClick={() => setSelectedFileRecord(undefined)}
                   marginRight="1rem"
                 >
                   Cancel
