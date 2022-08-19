@@ -1,14 +1,17 @@
 ## TODO
 - Client
   - Refresh appsync subscriptions if they are lost
-  - Change favico and logo
-  - Change Tensor layer names to english
-  - in mobile pre-filled login/signup forms turn to empty in focus
+  - **Change favico and logo**
+  - **Change Tensor layer names to english**
+  - in Firefox mobile pre-filled login/signup forms turn to empty in focus
   - in mobile safari the native bottom navigation bar is making  the page too long (the bottom button will be not shown)
 - polish the code
   - Remove big files from git
 - Terraform
   - Modularize Terraform code
-  - No manual steps
-- Make good README where is installation instructions and architecture
-- Make installation using only scripts (test what parts need to be done still manually)
+  - **No manual steps**
+- Misc
+  - **Make good README where is installation instructions and architecture**
+  - Make installation using only scripts (test what parts need to be done still manually)
+- Deployment
+  - **Have a solid distribution of the client (Does the s3 going through route 53 enough? CloudFront?)**

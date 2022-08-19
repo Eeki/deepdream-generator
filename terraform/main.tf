@@ -1,5 +1,6 @@
 # TODO standardize naming (_ vs -)
-
+# TODO add route53 records to terraform
+# TODO test to re-install
 terraform {
   required_providers {
     aws = {
@@ -17,6 +18,13 @@ provider "aws" {
   region = var.region
 }
 
+# This AWS provider is specifically for the SSL certificate.
+# These need to be created in us-east-1 for Cloudfront to be able to use them.
+provider "aws" {
+  alias  = "acm_provider"
+  region = "us-east-1"
+}
+
 locals {
   module_path        = abspath(path.module)
   codebase_root_path = abspath("${path.module}/..")
@@ -26,7 +34,7 @@ locals {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_s3_bucket" "public_client_bucket" {
-  bucket = "deepdream-generator-public-client"
+  bucket = "deepdream-generator-public-client" # TODO get from tfvars
   force_destroy=var.force_destroy_buckets
 
   website {
@@ -77,6 +85,67 @@ resource "aws_s3_bucket" "user_data_bucket" {
       "ETag"
     ]
     max_age_seconds = 3000
+  }
+}
+
+
+# Cloudfront
+# ----------------------------------------------------------------------------------------------------------------------
+# Cloudfront distribution for the front end.
+resource "aws_cloudfront_distribution" "s3_distribution" {
+  origin {
+    domain_name = aws_s3_bucket.public_client_bucket.website_endpoint
+    origin_id = aws_s3_bucket.public_client_bucket.bucket
+
+    custom_origin_config {
+      http_port = 80
+      https_port = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+  }
+
+  enabled = true
+  is_ipv6_enabled = true
+  default_root_object = "index.html"
+
+  aliases = [var.domain_name, "www.${var.domain_name}"]
+
+  custom_error_response {
+    error_caching_min_ttl = 0
+    error_code = 404
+    response_code = 200
+    response_page_path = "/404.html"
+  }
+
+  default_cache_behavior {
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods = ["GET", "HEAD"]
+    target_origin_id = aws_s3_bucket.public_client_bucket.id
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+    compress = true
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "whitelist"
+      locations        = ["FI"]
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn = var.certificate_arn
+    ssl_support_method = "sni-only"
+    minimum_protocol_version = "TLSv1.1_2016"
   }
 }
 
