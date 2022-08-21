@@ -4,10 +4,12 @@ import Auth from '@aws-amplify/auth'
 import { Center, Box } from '@chakra-ui/react'
 
 import { AppContext } from '../../libs/contextLib'
+import { headerHeight } from '../../libs/const'
 import { onError } from '../../libs/errorLib'
 import { Header } from '../../components/Header'
 import { Spinner } from '../../components/Spinner'
 import { Routes } from '../../Routes'
+
 import type { UserInfo, AmplifyConfigs } from '../../libs/types'
 
 interface AppProps {
@@ -49,7 +51,7 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
   }
 
   return (
-    <Box height="100vh" width="100vw">
+    <Box height="100%" width="100%" position="relative">
       <AppContext.Provider
         value={{ isAuthenticated, userHasAuthenticated, user, amplifyConfigs }}
       >
@@ -59,7 +61,9 @@ function App({ amplifyConfigs }: AppProps): JSX.Element {
             <Spinner />
           </Center>
         ) : (
-          <Routes />
+          <Box height={`calc(100% - ${headerHeight}px)`} width="100%">
+            <Routes />
+          </Box>
         )}
       </AppContext.Provider>
     </Box>

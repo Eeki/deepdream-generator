@@ -39,7 +39,7 @@ resource "aws_s3_bucket" "public_client_bucket" {
 
   website {
     index_document = "index.html"
-    error_document = "error.html"
+    error_document = "index.html"
   }
 }
 
@@ -72,6 +72,7 @@ resource "aws_s3_bucket" "user_data_bucket" {
   bucket = "deepdream-generator-user-data"
   force_destroy=var.force_destroy_buckets
 
+  # TODO Deprecated: Use the aws_s3_bucket_cors_configuration resource instead
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "PUT", "POST", "DELETE", "HEAD"]

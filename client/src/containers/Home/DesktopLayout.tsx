@@ -3,7 +3,6 @@ import { Box, Center, Flex } from '@chakra-ui/react'
 
 import { FileBrowser } from '../FileBrowser'
 import { GenerateDeepdream } from '../GenerateDeepdream'
-import { headerHeight } from '../../libs/const'
 import type { FileRecord } from '../../libs/types'
 
 interface DesktopLayoutProps {
@@ -16,7 +15,7 @@ export function DesktopLayout({
   selectedFileRecord,
 }: DesktopLayoutProps): JSX.Element {
   return (
-    <Center width="100vw" height={`calc(100vh - ${headerHeight}px)`}>
+    <Center width="100%" height="100%">
       <Flex
         height="100%"
         minH={300}

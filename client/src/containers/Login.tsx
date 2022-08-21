@@ -20,7 +20,6 @@ import { Card } from '../components/Card'
 import { useAppContext } from '../libs/contextLib'
 import { onError } from '../libs/errorLib'
 import { useFormFields } from '../libs/hooks/form'
-import { headerHeight } from '../libs/const'
 
 export function Login(): JSX.Element {
   const history = useHistory()
@@ -49,8 +48,8 @@ export function Login(): JSX.Element {
   return (
     <Flex
       flexDirection="column"
-      width="100vw"
-      height={`calc(100vh - ${headerHeight}px)`}
+      width="100%"
+      height="100%"
       justifyContent="center"
       alignItems="center"
     >

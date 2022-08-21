@@ -8,7 +8,6 @@ import { useAppContext } from '../../libs/contextLib'
 import { useFormFields } from '../../libs/hooks/form'
 import { onError } from '../../libs/errorLib'
 import { SignupForm } from './SignupForm'
-import { headerHeight } from '../../libs/const'
 import { ConfirmationForm } from './ConfirmationForm'
 import type { ISignUpResult } from 'amazon-cognito-identity-js'
 
@@ -74,8 +73,8 @@ export function Signup(): JSX.Element {
   return (
     <Flex
       flexDirection="column"
-      width="100vw"
-      height={`calc(100vh - ${headerHeight}px)`}
+      width="100%"
+      height="100%"
       justifyContent="center"
       alignItems="center"
     >
