@@ -14,7 +14,7 @@ interface s3VaultCacheItem {
 
 const s3Cache: Record<string, s3VaultCacheItem> = {}
 
-// TODO get and return the mime type of the file. It will be saved to db
+// TODO get and return the mime type of the file. It should be saved to db
 export async function s3PrivateUpload(
   file: File,
   user?: UserInfo,
@@ -23,6 +23,7 @@ export async function s3PrivateUpload(
   if (!bucketName) {
     throw new Error('S3 bucket is not configured.')
   }
+
   if (!user?.username) {
     throw new Error('Cannot get current user. Please log out and try again.')
   }
@@ -30,12 +31,14 @@ export async function s3PrivateUpload(
   const s3FilePath = `private/${user.username}/${uuidv4()}-${
     file.name
   }`.replace(/\s+/g, '')
+
   await Storage.put(s3FilePath, file, {
     contentType: file.type,
     customPrefix: {
       public: '',
     },
   })
+
   return { file_path: s3FilePath, file_name: file.name } // TODO add file_key
 }
 

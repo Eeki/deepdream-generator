@@ -10,15 +10,14 @@ interface SelectParametersProps {
 }
 
 const tensorLayers = [
-  'Pelkistetyin',
-  'Vielä pelkistetympi',
-  'pelkistetty',
-  'Härö silmä',
-  'Silmä',
-  'Koira',
-  'Enemmän koiria',
-  'Eri elukoita',
-  'Lintuja',
+  'Reduced',
+  'Reduced x 2',
+  'Strange eyes',
+  'Eyes',
+  'Dogs',
+  'Dogs x 2',
+  'Animals',
+  'Birds',
 ]
 
 export const SelectParameters = ({

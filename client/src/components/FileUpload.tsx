@@ -8,6 +8,7 @@ import { s3PrivateUpload, UploadResult } from '../libs/awsS3Lib'
 import { onError } from '../libs/errorLib'
 import { useAppContext } from '../libs/contextLib'
 import { CreateOwnFileFileRecord } from '../libs/graphql/mutations'
+import { resizeImageFile } from '../libs/image-resize'
 import { FileRecordType } from '../libs/types'
 
 interface FileUploadProps {
@@ -62,8 +63,10 @@ export const FileUpload = ({
       setIsLoading(true)
 
       try {
+        const resizedImage = await resizeImageFile(file)
+
         const uploadResult = await s3PrivateUpload(
-          file,
+          resizedImage,
           user,
           amplifyConfigs?.Storage?.bucket
         )

@@ -52,10 +52,12 @@ export function FileBrowser({
 
   const getJobs = useCallback(() => {
     const type = tabs[tabIndex].type
-    if (type === 'uploaded') {
-      return []
-    }
-    return jobs.filter(({ progress }) => progress < 1)
+    if (type === 'uploaded') return []
+
+    const unfinishedJobs = jobs.filter(({ progress }) => progress < 1)
+
+    console.log('unfinishedJobs', unfinishedJobs)
+    return unfinishedJobs
   }, [jobs, tabIndex])
 
   const filteredFileRecords = getFileRecords()

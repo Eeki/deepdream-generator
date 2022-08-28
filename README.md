@@ -1,12 +1,13 @@
 ## TODO
 - Client
   - Refresh appsync subscriptions if they are lost
-  - **Change favico and logo**
-  - **Change Tensor layer names to english**
+  - **Figure out why job progress is not always visible**
+  - **UPDATE packages**
+  - **Always downscale images if too big**
 - Workers
-  - Always downscale images if too big
+  - **Update dependencies**
 - polish the code
-  - Remove big files from git
+  - Remove big files from git --> s3
 - Terraform
   - Modularize Terraform code
   - **No manual steps**

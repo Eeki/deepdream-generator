@@ -48,6 +48,7 @@ export function useJobs(): JobsResult {
       const response = await GraphQLAPI.graphql(graphqlOperation(ListUserJobs))
       const jobs = get(response, 'data.listUserJobs.items', [])
       setJobs(jobs)
+      // TODO better typing for errors
     } catch (e: any) {
       onError(e)
     } finally {
