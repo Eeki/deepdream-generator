@@ -3,10 +3,9 @@
   - Refresh appsync subscriptions if they are lost
   - **Figure out why job progress is not always visible**
   - **UPDATE packages**
-  - **Always downscale images if too big**
 - Workers
   - **Update dependencies**
-- polish the code
+- Code polishing
   - Remove big files from git --> s3
 - Terraform
   - Modularize Terraform code
@@ -14,3 +13,4 @@
 - Misc
   - **Make good README where is installation instructions and architecture**
   - Make installation using only scripts (test what parts need to be done still manually)
+  - **Fix all vulnerabilities https://github.com/Eeki/deepdream-generator/security/dependabot**
